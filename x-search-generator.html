@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X検索コマンド ジェネレータ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 1rem 0 0.8rem 0;
+            color: #1a1a1a;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #1da1f2;
+            box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
+        }
+
+        input[type="date"] {
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-item span {
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        #commands {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .command-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .command-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .command-description {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .command-code {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #1a1a1a;
+            word-break: break-all;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: all;
+        }
+
+        .command-code:hover {
+            background: #efefef;
+            border-color: #bbb;
+        }
+
+        .command-code.copied {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        #no-user {
+            padding: 1rem;
+            background: #e3f2fd;
+            border-radius: 6px;
+            color: #1565c0;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 1.5rem 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>🔍 X検索コマンド ジェネレータ</h2>
+            
+            <div class="input-group">
+                <div>
+                    <label for="userId">ユーザーID (@以降)</label>
+                    <input type="text" id="userId" placeholder="例: elon, twitter_jp">
+                    <p class="help-text">@記号を除いた部分のみ入力</p>
+                </div>
+                <div>
+                    <label for="keyword">キーワード (オプション)</label>
+                    <input type="text" id="keyword" placeholder="例: AI, 技術">
+                </div>
+            </div>
+
+            <h3>基本検索</h3>
+            <div class="checkbox-row">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-basic-user" checked>
+                    <span>ユーザーのポスト</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-replies">
+                    <span>リプライのみ</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-exclude-replies">
+                    <span>リプライ除外</span>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <h3>メディア・形式</h3>
+            <div class="checkbox-row">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-images">
+                    <span>画像のみ</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-videos">
+                    <span>動画のみ</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-media">
+                    <span>画像・動画</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-links">
+                    <span>URL付き</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-nativeretweets">
+                    <span>リポストのみ</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-quote-retweets">
+                    <span>引用リポスト</span>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <h3>認証・フォロー</h3>
+            <div class="checkbox-row">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-verified">
+                    <span>認証済みアカウント</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="chk-follows">
+                    <span>フォロー中のみ</span>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <h3>期間指定</h3>
+            <div class="input-group">
+                <div>
+                    <label for="dateFrom">開始日 (YYYY-MM-DD)</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div>
+                    <label for="dateUntil">終了日 (YYYY-MM-DD)</label>
+                    <input type="date" id="dateUntil">
+                </div>
+            </div>
+
+            <h3>エンゲージメント指標</h3>
+            <div class="input-group grid-3">
+                <div>
+                    <label for="minFaves">最小いいね数</label>
+                    <input type="number" id="minFaves" placeholder="例: 100" min="0">
+                </div>
+                <div>
+                    <label for="minRetweets">最小リポスト数</label>
+                    <input type="number" id="minRetweets" placeholder="例: 50" min="0">
+                </div>
+                <div>
+                    <label for="minReplies">最小リプライ数</label>
+                    <input type="number" id="minReplies" placeholder="例: 10" min="0">
+                </div>
+            </div>
+
+            <div id="commands">
+                <h3>生成されたコマンド</h3>
+                <div id="commands-list"></div>
+            </div>
+
+            <div id="no-user">
+                ユーザーIDを入力して、コマンドを生成してください
+            </div>
+
+            <div class="footer">
+                <p>💡 コマンドをクリックで自動コピー | Xの検索欄に貼り付けて使用</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userIdInput = document.getElementById('userId');
+        const keywordInput = document.getElementById('keyword');
+        const commandsDiv = document.getElementById('commands');
+        const noUserDiv = document.getElementById('no-user');
+        const commandsList = document.getElementById('commands-list');
+
+        function generateCommands() {
+            const userId = userIdInput.value.trim().replace(/^@/, '');
+            const keyword = keywordInput.value.trim();
+            
+            if (!userId) {
+                commandsDiv.style.display = 'none';
+                noUserDiv.style.display = 'block';
+                return;
+            }
+
+            noUserDiv.style.display = 'none';
+            commandsDiv.style.display = 'block';
+            commandsList.innerHTML = '';
+
+            const commands = [];
+
+            // 基本検索
+            if (document.getElementById('chk-basic-user').checked) {
+                commands.push({
+                    title: 'ユーザーのポストのみ',
+                    command: `from:${userId}`,
+                    description: `@${userId}が投稿したポストのみを表示`
+                });
+            }
+
+            if (document.getElementById('chk-replies').checked) {
+                commands.push({
+                    title: 'リプライのみ',
+                    command: `from:${userId} filter:replies`,
+                    description: `@${userId}からのリプライのみを表示`
+                });
+            }
+
+            if (document.getElementById('chk-exclude-replies').checked) {
+                commands.push({
+                    title: 'リプライを除外',
+                    command: `from:${userId} exclude:replies`,
+                    description: `リプライを含まずに表示`
+                });
+            }
+
+            // メディア・形式
+            if (document.getElementById('chk-images').checked) {
+                commands.push({
+                    title: '画像付きポスト',
+                    command: `from:${userId} filter:images`,
+                    description: '画像付きのポストのみを表示'
+                });
+            }
+
+            if (document.getElementById('chk-videos').checked) {
+                commands.push({
+                    title: '動画付きポスト',
+                    command: `from:${userId} filter:videos`,
+                    description: '動画付きのポストのみを表示'
+                });
+            }
+
+            if (document.getElementById('chk-media').checked) {
+                commands.push({
+                    title: '画像・動画付き',
+                    command: `from:${userId} filter:media`,
+                    description: '画像または動画付きのポストのみを表示'
+                });
+            }
+
+            if (document.getElementById('chk-links').checked) {
+                commands.push({
+                    title: 'URL付きポスト',
+                    command: `from:${userId} filter:links`,
+                    description: 'URLを含むポストのみを表示'
+                });
+            }
+
+            if (document.getElementById('chk-nativeretweets').checked) {
+                commands.push({
+                    title: 'リポストのみ',
+                    command: `from:${userId} filter:nativeretweets`,
+                    description: 'リポストのみを表示'
+                });
+            }
+
+            if (document.getElementById('chk-quote-retweets').checked) {
+                commands.push({
+                    title: '引用リポスト',
+                    command: `twitter.com/${userId} -from:${userId}`,
+                    description: `@${userId}への引用リポストのみを表示`
+                });
+            }
+
+            // 認証・フォロー
+            if (document.getElementById('chk-verified').checked) {
+                commands.push({
+                    title: '認証済みアカウントのみ',
+                    command: `from:${userId} filter:verified`,
+                    description: '青チェックマーク付きアカウントのポストのみ'
+                });
+            }
+
+            if (document.getElementById('chk-follows').checked) {
+                commands.push({
+                    title: 'フォロー中のアカウント',
+                    command: `from:${userId} filter:follows`,
+                    description: 'フォローしているアカウントのポストのみ'
+                });
+            }
+
+            // 日付
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateUntil = document.getElementById('dateUntil').value;
+
+            if (dateFrom && dateUntil) {
+                commands.push({
+                    title: '指定期間内のポスト',
+                    command: `from:${userId} since:${dateFrom} until:${dateUntil}`,
+                    description: `${dateFrom}から${dateUntil}の間のポスト`
+                });
+            } else if (dateFrom) {
+                commands.push({
+                    title: '指定日以降のポスト',
+                    command: `from:${userId} since:${dateFrom}`,
+                    description: `${dateFrom}以降のポスト`
+                });
+            } else if (dateUntil) {
+                commands.push({
+                    title: '指定日以前のポスト',
+                    command: `from:${userId} until:${dateUntil}`,
+                    description: `${dateUntil}以前のポスト`
+                });
+            }
+
+            // エンゲージメント
+            const minFaves = document.getElementById('minFaves').value;
+            const minRetweets = document.getElementById('minRetweets').value;
+            const minReplies = document.getElementById('minReplies').value;
+
+            if (minFaves) {
+                commands.push({
+                    title: `いいね${minFaves}以上`,
+                    command: `from:${userId} min_faves:${minFaves}`,
+                    description: `${minFaves}以上のいいねを獲得したポスト`
+                });
+            }
+
+            if (minRetweets) {
+                commands.push({
+                    title: `リポスト${minRetweets}以上`,
+                    command: `from:${userId} min_retweets:${minRetweets}`,
+                    description: `${minRetweets}以上のリポストを獲得したポスト`
+                });
+            }
+
+            if (minReplies) {
+                commands.push({
+                    title: `リプライ${minReplies}以上`,
+                    command: `from:${userId} min_replies:${minReplies}`,
+                    description: `${minReplies}以上のリプライを獲得したポスト`
+                });
+            }
+
+            // キーワード組み合わせ
+            if (keyword) {
+                commands.push({
+                    title: 'キーワード + ユーザーポスト',
+                    command: `from:${userId} "${keyword}"`,
+                    description: `"${keyword}"を含む@${userId}のポスト（完全一致）`
+                });
+                
+                commands.push({
+                    title: 'キーワード + ユーザーポスト（部分一致）',
+                    command: `from:${userId} ${keyword}`,
+                    description: `${keyword}を含む@${userId}のポスト`
+                });
+            }
+
+            // コマンドカードを生成
+            commands.forEach((cmd) => {
+                const card = document.createElement('div');
+                card.className = 'command-card';
+
+                const title = document.createElement('p');
+                title.className = 'command-title';
+                title.textContent = cmd.title;
+
+                const description = document.createElement('p');
+                description.className = 'command-description';
+                description.textContent = cmd.description;
+
+                const commandCode = document.createElement('div');
+                commandCode.className = 'command-code';
+                commandCode.textContent = cmd.command;
+                
+                commandCode.addEventListener('click', () => {
+                    navigator.clipboard.writeText(cmd.command).then(() => {
+                        const originalText = commandCode.textContent;
+                        commandCode.classList.add('copied');
+                        commandCode.textContent = 'コピーしました！';
+                        setTimeout(() => {
+                            commandCode.textContent = originalText;
+                            commandCode.classList.remove('copied');
+                        }, 1500);
+                    });
+                });
+
+                card.appendChild(title);
+                card.appendChild(description);
+                card.appendChild(commandCode);
+                commandsList.appendChild(card);
+            });
+        }
+
+        // イベントリスナー
+        userIdInput.addEventListener('input', generateCommands);
+        keywordInput.addEventListener('input', generateCommands);
+        
+        document.getElementById('chk-basic-user').addEventListener('change', generateCommands);
+        document.getElementById('chk-replies').addEventListener('change', generateCommands);
+        document.getElementById('chk-exclude-replies').addEventListener('change', generateCommands);
+        document.getElementById('chk-images').addEventListener('change', generateCommands);
+        document.getElementById('chk-videos').addEventListener('change', generateCommands);
+        document.getElementById('chk-media').addEventListener('change', generateCommands);
+        document.getElementById('chk-links').addEventListener('change', generateCommands);
+        document.getElementById('chk-nativeretweets').addEventListener('change', generateCommands);
+        document.getElementById('chk-quote-retweets').addEventListener('change', generateCommands);
+        document.getElementById('chk-verified').addEventListener('change', generateCommands);
+        document.getElementById('chk-follows').addEventListener('change', generateCommands);
+        document.getElementById('dateFrom').addEventListener('change', generateCommands);
+        document.getElementById('dateUntil').addEventListener('change', generateCommands);
+        document.getElementById('minFaves').addEventListener('input', generateCommands);
+        document.getElementById('minRetweets').addEventListener('input', generateCommands);
+        document.getElementById('minReplies').addEventListener('input', generateCommands);
+    </script>
+</body>
+</html>
