@@ -25,3 +25,6 @@ build/
 
 # Claude Code
 .claude/
+
+# Source file (keep local only, encrypted version is index.html)
+x-search-generator.html
