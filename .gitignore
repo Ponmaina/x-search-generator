@@ -22,3 +22,6 @@ build/
 
 # Cache
 .cache/
+
+# Claude Code
+.claude/
