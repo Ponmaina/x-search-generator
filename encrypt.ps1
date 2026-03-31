@@ -1,6 +1,7 @@
-# StatiCrypt 暗号化ツール（パスワード検証付き）
+﻿# StatiCrypt encrypt tool with password verification
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+chcp 65001 | Out-Null
 
 Write-Host "================================"
 Write-Host " StatiCrypt 暗号化ツール"
@@ -8,67 +9,58 @@ Write-Host "================================"
 Write-Host ""
 
 $hashFile = Join-Path $PSScriptRoot ".pwdhash"
-$sourceFile = Join-Path $PSScriptRoot "x-search-generator.html"
-$outputFile = Join-Path $PSScriptRoot "index.html"
 
 function Get-PasswordHash($password) {
     $sha256 = [System.Security.Cryptography.SHA256]::Create()
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($password)
     $hash = $sha256.ComputeHash($bytes)
-    return [System.BitConverter]::ToString($hash).Replace("-", "").ToLower()
+    return [System.BitConverter]::ToString($hash).Replace('-', '').ToLower()
 }
 
-function Read-PlainPassword($prompt) {
+function Read-HiddenPassword($prompt) {
     $secure = Read-Host $prompt -AsSecureString
-    return [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-        [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-    )
+    $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+    try { return [Runtime.InteropServices.Marshal]::PtrToStringAuto($ptr) }
+    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 }
 
-# 現在のパスワード検証
 if (Test-Path $hashFile) {
-    $storedHash = (Get-Content $hashFile -Raw).Trim()
-    $currentPw = Read-PlainPassword "現在のパスワードを入力してください"
-    $enteredHash = Get-PasswordHash $currentPw
-
-    if ($enteredHash -ne $storedHash) {
+    $storedHash = (Get-Content $hashFile -Encoding UTF8 -Raw).Trim()
+    $currentPw = Read-HiddenPassword "現在のパスワードを入力"
+    if ((Get-PasswordHash $currentPw) -ne $storedHash) {
         Write-Host ""
         Write-Host "パスワードが正しくありません。" -ForegroundColor Red
-        Read-Host "Enterキーで終了"
+        Read-Host "Enterで終了"
         exit 1
     }
     Write-Host "確認OK" -ForegroundColor Green
 }
 
-# 新しいパスワード入力
 Write-Host ""
-$newPw  = Read-PlainPassword "新しいパスワードを入力してください"
-$newPw2 = Read-PlainPassword "もう一度入力してください"
+$newPw  = Read-HiddenPassword "新しいパスワードを入力"
+$newPw2 = Read-HiddenPassword "もう一度入力"
 
 if ($newPw -ne $newPw2) {
     Write-Host ""
     Write-Host "パスワードが一致しません。" -ForegroundColor Red
-    Read-Host "Enterキーで終了"
+    Read-Host "Enterで終了"
     exit 1
 }
 
-# 暗号化
 Write-Host ""
 Write-Host "暗号化中..."
 Set-Location $PSScriptRoot
-$result = & npx staticrypt x-search-generator.html -p $newPw -d encrypted --short 2>&1
+& npx staticrypt x-search-generator.html -p $newPw -d encrypted --short
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "エラーが発生しました: $result" -ForegroundColor Red
-    Read-Host "Enterキーで終了"
+    Write-Host "エラーが発生しました。" -ForegroundColor Red
+    Read-Host "Enterで終了"
     exit 1
 }
 Move-Item -Force "encrypted\x-search-generator.html" "index.html"
-Remove-Item -Force "encrypted" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "encrypted" -ErrorAction SilentlyContinue
 
-# 新しいハッシュを保存
-$newHash = Get-PasswordHash $newPw
-Set-Content -Path $hashFile -Value $newHash -NoNewline
+Set-Content -Path $hashFile -Value (Get-PasswordHash $newPw) -Encoding UTF8 -NoNewline
 
 Write-Host ""
-Write-Host "完了しました！ index.html が更新されました。" -ForegroundColor Green
-Read-Host "Enterキーで終了"
+Write-Host "完了しました！index.html が更新されました。" -ForegroundColor Green
+Read-Host "Enterで終了"
