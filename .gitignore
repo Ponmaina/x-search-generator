@@ -28,3 +28,6 @@ build/
 
 # Source file (keep local only, encrypted version is index.html)
 x-search-generator.html
+
+# Password hash (local only, never commit)
+.pwdhash
