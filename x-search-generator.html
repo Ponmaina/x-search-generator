@@ -629,10 +629,12 @@
             // キーワード組み合わせ
             if (keyword) {
                 const base = userId ? `from:${userId} ` : '';
+                const keywords = keyword.split(/\s+/).filter(k => k);
+                const exactMatch = keywords.map(k => `"${k}"`).join(' ');
                 commands.push({
                     title: 'キーワード完全一致',
-                    command: `${base}"${keyword}"`,
-                    description: userId ? `"${keyword}"を含む@${userId}のポスト（完全一致）` : `"${keyword}"の完全一致検索`
+                    command: `${base}${exactMatch}`,
+                    description: userId ? `${keywords.join('・')}を含む@${userId}のポスト（完全一致）` : `${keywords.join('・')}の完全一致検索`
                 });
                 commands.push({
                     title: 'キーワード部分一致',
