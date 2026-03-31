@@ -19,9 +19,21 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem 1rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .right-panel {
+            position: sticky;
+            top: 1rem;
         }
 
         .card {
@@ -124,7 +136,6 @@
         }
 
         #commands {
-            margin-top: 2rem;
             display: none;
         }
 
@@ -210,9 +221,10 @@
 </head>
 <body>
     <div class="container">
+        <div class="layout">
         <div class="card">
             <h2>🔍 X検索コマンド ジェネレータ</h2>
-            
+
             <div class="input-group">
                 <div>
                     <label for="userId">ユーザーID (@以降)</label>
@@ -315,18 +327,23 @@
                 </div>
             </div>
 
-            <div id="commands">
-                <h3>生成されたコマンド</h3>
-                <div id="commands-list"></div>
-            </div>
-
-            <div id="no-user">
-                ユーザーIDを入力して、コマンドを生成してください
-            </div>
-
             <div class="footer">
                 <p>💡 コマンドをクリックで自動コピー | Xの検索欄に貼り付けて使用</p>
             </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="card">
+                <div id="commands">
+                    <h2>生成されたコマンド</h2>
+                    <div id="commands-list"></div>
+                </div>
+                <div id="no-user">
+                    ユーザーIDを入力して、コマンドを生成してください
+                </div>
+            </div>
+        </div>
+
         </div>
     </div>
 
