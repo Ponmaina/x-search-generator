@@ -50,7 +50,7 @@ if ($newPw -ne $newPw2) {
 Write-Host ""
 Write-Host "暗号化中..."
 Set-Location $PSScriptRoot
-& npx staticrypt x-search-generator.html -p $newPw -d encrypted --short
+& npx staticrypt x-search-generator.html -p $newPw -d encrypted
 if ($LASTEXITCODE -ne 0) {
     Write-Host "エラーが発生しました。" -ForegroundColor Red
     Read-Host "Enterで終了"
