@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>きせかえ競合インテリジェンス・ワークベンチ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{--ink:#0f1419;--sub:#536471;--line:#e2e8ee;--bg:#f6f8fa;--x:#1da1f2;--accent:#7856ff;--ok:#137333;--warn:#a05a00;--bad:#c0166b;--chip:#eef0ff;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Noto Sans JP",-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;}
+  a{color:var(--x);}
+  .topbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#7856ff,#1da1f2);color:#fff;padding:7px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+  .topbar h1{font-size:.92rem;margin:0;font-weight:700;}
+  .topbar .save{margin-left:auto;font-size:.74rem;opacity:.95;}
+  .tabs{display:flex;gap:2px;background:#fff;padding:0 10px;border-bottom:1px solid var(--line);position:sticky;top:33px;z-index:19;overflow-x:auto;}
+  .tabs button{border:0;background:none;padding:7px 11px;font-size:.82rem;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+  .tabs button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700;}
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 100px;}
+  .view{display:none;} .view.active{display:block;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(15,20,25,.04);}
+  h2{font-size:1.12rem;margin:0 0 4px;} .muted{color:var(--sub);font-size:.86rem;margin:0 0 14px;}
+  h3{font-size:.98rem;margin:14px 0 8px;}
+  label{display:block;font-size:.8rem;color:var(--sub);margin:10px 0 4px;font-weight:600;}
+  input[type=text],input[type=date],input[type=url],input[type=number],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:.92rem;font-family:inherit;background:#fff;}
+  textarea{resize:vertical;min-height:64px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;} .row > *{flex:1;min-width:130px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:9px 15px;font-size:.9rem;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;}
+  .btn:hover{filter:brightness(1.06);}
+  .btn.sec{background:#eef0ff;color:var(--accent);} .btn.x{background:#0f1419;} .btn.gray{background:#eef3f6;color:var(--ink);} .btn.sm{padding:6px 10px;font-size:.8rem;}
+  .btn.danger{background:#fdeef3;color:var(--bad);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .chip{background:var(--chip);color:var(--accent);border-radius:999px;padding:3px 10px;font-size:.78rem;display:inline-flex;align-items:center;gap:6px;}
+  .chip button{border:0;background:none;color:var(--accent);cursor:pointer;font-size:.9rem;line-height:1;padding:0;}
+  table{width:100%;border-collapse:collapse;font-size:.86rem;}
+  th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:.74rem;color:var(--sub);background:#fafbfc;position:sticky;top:62px;}
+  .tablewrap{overflow:auto;max-height:62vh;border:1px solid var(--line);border-radius:10px;}
+  .pill{display:inline-block;font-size:.72rem;font-weight:700;border-radius:999px;padding:2px 8px;}
+  .pill.self{background:#e9f7ee;color:var(--ok);} .pill.comp{background:#eef0ff;color:var(--accent);}
+  .pill.好評{background:#e9f7ee;color:var(--ok);} .pill.不満{background:#fdeef3;color:var(--bad);}
+  .pill.会員登録した{background:#fff3e0;color:var(--warn);} .pill.要注目{background:#eef0ff;color:var(--accent);}
+  .dash-comp{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .dash-comp .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .dash-comp .head b{font-size:1rem;}
+  .linkrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .empty{color:var(--sub);font-size:.86rem;padding:10px 0;}
+  .qbox{background:#0f1419;color:#d9e6f0;border-radius:10px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;white-space:pre-wrap;word-break:break-all;}
+  .toggle{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;color:var(--ink);font-weight:600;background:#f1f4f7;border:1px solid var(--line);border-radius:9px;padding:7px 11px;cursor:pointer;}
+  .toggle input{width:auto;}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .seg button{border:0;background:#fff;padding:8px 14px;font-size:.85rem;cursor:pointer;color:var(--sub);font-weight:600;}
+  .seg button.on{background:var(--accent);color:#fff;}
+  .small{font-size:.78rem;color:var(--sub);}
+  .hint{background:#fff8ec;border:1px solid #f6e2a8;border-radius:10px;padding:10px 12px;font-size:.82rem;margin-top:10px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
+  .colgrid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  h2 i,h3 i,.btn i,.tabs button i,.seg button i{margin-right:6px;}
+  @media(max-width:640px){.grid2,.grid3,.colgrid2{grid-template-columns:1fr;}}
+  .iconbtn{border:0;background:none;cursor:pointer;color:var(--sub);font-size:.85rem;padding:2px 6px;}
+  .iconbtn:hover{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>きせかえ競合インテリジェンス・ワークベンチ</h1>
+  <span class="save" id="saveState">読み込み中…</span>
+</div>
+<div class="tabs">
+  <button data-tab="dash" class="active"><i class="fa-solid fa-gauge-high"></i>① ダッシュ</button>
+  <button data-tab="catalog"><i class="fa-solid fa-table-list"></i>② カタログ</button>
+  <button data-tab="search"><i class="fa-solid fa-magnifying-glass"></i>③ 検索</button>
+  <button data-tab="voc"><i class="fa-regular fa-comments"></i>④ VOC</button>
+  <button data-tab="master"><i class="fa-solid fa-sliders"></i>⑤ マスタ</button>
+  <button data-tab="wf"><i class="fa-solid fa-pen-ruler"></i>⑥ WF生成</button>
+</div>
+
+<div class="wrap">
+  <!-- ① DASHBOARD -->
+  <section id="view-dash" class="view active">
+    <div class="card">
+      <h2><i class="fa-solid fa-gauge-high"></i>ダッシュボード</h2>
+      <p class="muted">競合・自社ごとに、きせかえ施策の検索リンクと登録済みの施策・最近のVOCをまとめます。リンクはワンクリックでXが開きます。</p>
+      <div id="dashBody"></div>
+    </div>
+  </section>
+
+  <!-- ② CATALOG -->
+  <section id="view-catalog" class="view">
+    <div class="card">
+      <h2><i class="fa-solid fa-table-list"></i>定量カタログ（施策レコード）</h2>
+      <p class="muted">主体 × IP × キセカエ名 × 期間。Vポイント等は Easy Scraper で抽出して貼り付け取り込み。月で絞り込み・CSV書き出し可。</p>
+      <div class="toolbar">
+        <div><label>月で絞り込み</label><input type="month" id="catMonth"></div>
+        <div><label>主体で絞り込み</label><select id="catSubjectFilter"></select></div>
+        <div style="display:flex;align-items:flex-end;gap:8px;">
+          <button class="btn gray sm" id="catClearFilter"><i class="fa-solid fa-filter-circle-xmark"></i>絞り込み解除</button>
+          <button class="btn sec sm" id="catExport"><i class="fa-solid fa-file-csv"></i>CSV書き出し</button>
+        </div>
+      </div>
+      <div class="tablewrap" style="margin-top:12px;">
+        <table>
+          <thead><tr>
+            <th>主体</th><th>IP</th><th>キセカエ名</th><th>リリース日</th><th>掲載終了</th><th>ジャンル</th><th>VOC/数字メモ</th><th></th>
+          </tr></thead>
+          <tbody id="catRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-plus"></i>施策を1件追加</h3>
+      <div class="row">
+        <div><label>主体（競合/自社）</label><select id="cSubject"></select></div>
+        <div><label>IP（コラボ先）</label><select id="cIp"></select></div>
+      </div>
+      <div class="row">
+        <div><label>キセカエ名</label><input type="text" id="cName" placeholder="例：水戸ホーリーホック 会場限定きせかえ"></div>
+        <div><label>リリース日</label><input type="date" id="cRelease"></div>
+        <div><label>掲載終了日</label><input type="date" id="cEnd"></div>
+      </div>
+      <label>数字メモ（手入力。後から追える）</label>
+      <div class="row">
+        <div><input type="number" id="cRt" placeholder="RT"></div>
+        <div><input type="number" id="cLike" placeholder="いいね"></div>
+        <div><input type="number" id="cImp" placeholder="インプレッション"></div>
+        <div><input type="number" id="cFollow" placeholder="フォロワー"></div>
+      </div>
+      <div class="row">
+        <div><label>ツイートURL</label><input type="url" id="cUrl" placeholder="https://x.com/..."></div>
+        <div><label>数字メモの日付</label><input type="date" id="cMetricDate"></div>
+      </div>
+      <label>VOCメモ（任意）</label>
+      <textarea id="cVoc" placeholder="効果メモ・反応の要約など"></textarea>
+      <div style="margin-top:12px;"><button class="btn" id="cAdd"><i class="fa-solid fa-plus"></i>カタログに追加</button></div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-paste"></i>貼り付け取り込み（Easy Scraper 等）</h3>
+      <p class="small">1行＝1施策。<b>タブ または カンマ区切り</b>で <code>IP名 / キセカエ名 / リリース日 / 掲載終了日</code> の順。日付は空でもOK。主体は下で選んだものに揃えます。</p>
+      <div class="row">
+        <div><label>取り込み先（主体）</label><select id="impSubject"></select></div>
+        <div><label>新しいIPは自動登録</label>
+          <label class="toggle"><input type="checkbox" id="impAutoIp" checked> マスタに無いIP名を追加する</label>
+        </div>
+      </div>
+      <label>貼り付けエリア</label>
+      <textarea id="impText" style="min-height:120px" placeholder="水戸ホーリーホック&#9;会場限定きせかえ&#9;2026-06-01&#9;2026-06-30&#10;○○アイドル, スペシャルきせかえ, 2026-06-10, 2026-07-10"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn sec" id="impPreview"><i class="fa-solid fa-eye"></i>プレビュー</button>
+        <button class="btn" id="impRun"><i class="fa-solid fa-paste"></i>取り込む</button>
+      </div>
+      <div id="impResult" class="small" style="margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- ③ SEARCH -->
+  <section id="view-search" class="view">
+    <div class="card">
+      <h2><i class="fa-solid fa-magnifying-glass"></i>検索ビルダー</h2>
+      <p class="muted">表記ゆれ（きせかえ/キセカエ）を自動で反映。施策（公式告知）か生声（ユーザーの声）を切替えてXを開きます。</p>
+      <div style="margin:6px 0 4px;">
+        <span class="seg" id="modeSeg">
+          <button data-mode="policy" class="on">施策を知る（公式告知）</button>
+          <button data-mode="voice">生声を知る（VOC）</button>
+        </span>
+      </div>
+      <div class="row">
+        <div><label>主体（競合/自社）</label><select id="sSubject"></select></div>
+        <div><label>IP（任意）</label><select id="sIp"></select></div>
+      </div>
+      <label>追加キーワード（任意・スペース区切り）</label>
+      <input type="text" id="sExtra" placeholder="例：コラボ 限定">
+      <div class="row" style="margin-top:6px;">
+        <div><label>期間プリセット</label>
+          <select id="sPeriod">
+            <option value="">指定なし</option>
+            <option value="thismonth">今月</option>
+            <option value="lastmonth">先月</option>
+            <option value="30">過去30日</option>
+            <option value="90">過去90日</option>
+            <option value="custom">日付を手入力</option>
+          </select>
+        </div>
+        <div><label>since（任意）</label><input type="date" id="sSince"></div>
+        <div><label>until（任意）</label><input type="date" id="sUntil"></div>
+      </div>
+      <div class="row" style="margin-top:8px;align-items:center;">
+        <label class="toggle"><input type="checkbox" id="sLang" checked> 日本語のみ(lang:ja)</label>
+        <label class="toggle"><input type="checkbox" id="sNoRt" checked> リツイート除外</label>
+        <label class="toggle"><input type="checkbox" id="sMinFavOn"> いいね数の下限</label>
+        <div style="max-width:120px"><input type="number" id="sMinFav" value="20" min="0"></div>
+        <label class="toggle"><input type="radio" name="ftab" id="fLive" checked> 最新</label>
+        <label class="toggle"><input type="radio" name="ftab" id="fTop"> 話題</label>
+      </div>
+      <h3>生成されたクエリ（編集可）</h3>
+      <textarea id="sQuery" class="qbox" style="min-height:70px;color:#d9e6f0;background:#0f1419;border:0;"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn x" id="sOpen"><i class="fa-brands fa-x-twitter"></i>Xで検索を開く</button>
+        <button class="btn gray" id="sCopy"><i class="fa-regular fa-copy"></i>クエリをコピー</button>
+      </div>
+      <div class="hint">ヒント：0件なら条件をゆるめる（追加KW削除・期間/いいね下限オフ）。ORは大文字・記号は半角・Xはログイン必須。</div>
+    </div>
+  </section>
+
+  <!-- ④ VOC -->
+  <section id="view-voc" class="view">
+    <div class="colgrid2">
+    <div class="card">
+      <h2><i class="fa-regular fa-comments"></i>VOC収集</h2>
+      <p class="muted">拾った生声を賛否タグ付きで蓄積。後で施策・IPごとに見返せます。</p>
+      <label>声の本文（コピペ）</label>
+      <textarea id="vText" placeholder="ユーザーの声を貼り付け"></textarea>
+      <div class="row">
+        <div><label>URL（任意）</label><input type="url" id="vUrl" placeholder="https://x.com/..."></div>
+        <div><label>賛否タグ</label>
+          <select id="vSent">
+            <option>好評</option><option>不満</option><option>会員登録した</option><option>要注目</option>
+          </select>
+        </div>
+        <div><label>紐づく施策（任意）</label><select id="vCampaign"></select></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn" id="vAdd"><i class="fa-solid fa-plus"></i>VOCを追加</button></div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-list"></i>収集済みVOC <span class="small" id="vCount"></span></h3>
+      <div class="row" style="margin-bottom:10px;">
+        <div><label>賛否で絞る</label><select id="vFilter"><option value="">すべて</option><option>好評</option><option>不満</option><option>会員登録した</option><option>要注目</option></select></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn sec sm" id="vCopyAll"><i class="fa-regular fa-copy"></i>全部コピー（報告下地）</button></div>
+      </div>
+      <div id="vList"></div>
+    </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-download"></i>Xから取り込み（ブックマークレット）</h3>
+      <p class="small">下のボタンを<b>ブックマークバーにドラッグ</b>して登録 → Xで読みたい<b>投稿や記事のページ</b>を開き、ログインした状態でこのブックマークを押すと、<b>本文（記事は全文）とURLがこのツールに取り込まれ</b>、VOCタブに自動で入ります（賛否タグを選んで「＋ VOCを追加」で保存）。</p>
+      <p style="margin:10px 0"><a id="bmLink" class="btn x" href="#" onclick="return false;" draggable="true">📥 Xの投稿・記事を取り込み</a></p>
+      <div class="hint">
+        ・パスワードは一切使いません（あなたのログイン済み画面をそのまま読みます）。<br>
+        ・通常の投稿・スレッド・<b>記事（長文）</b>に対応。取り込みたい所を<b>選択（ドラッグで反転）してから押す</b>と、その部分だけを確実に取り込めます。<br>
+        ・押すと<b>新しいタブが開きます</b>。ブラウザに<b>ポップアップの許可</b>を求められたら許可してください。<br>
+        ・<b>個別の投稿／記事ページ</b>で押してください（タイムライン上では本文を特定できないことがあります）。<br>
+        ・うまく取れない時は本文を手動で貼り付けてください。ブックマークバーが無ければ Chrome は <code>Ctrl/⌘+Shift+B</code> で表示できます。
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ MASTER -->
+  <section id="view-master" class="view">
+    <div class="card">
+      <h2><i class="fa-solid fa-sliders"></i>マスタ管理</h2>
+      <p class="muted">競合・自社（決済アプリ）／ IPコラボ先 ／ カテゴリ（ジャンル）を自由に登録・編集します。</p>
+    </div>
+
+    <div class="grid3">
+    <div class="card">
+      <h3><i class="fa-solid fa-building"></i>競合・自社（決済アプリ）</h3>
+      <div class="row">
+        <div><label>名前</label><input type="text" id="mcName" placeholder="例：PayPay / d払い"></div>
+        <div><label>公式ハンドル（@なし）</label><input type="text" id="mcHandle" placeholder="例：PayPayOfficial"></div>
+        <div><label>きせかえ表記（カンマ区切り）</label><input type="text" id="mcKisekae" placeholder="きせかえ,キセカエ"></div>
+        <div style="max-width:150px"><label>区分</label>
+          <select id="mcSelf"><option value="false">競合</option><option value="true">自社</option></select>
+        </div>
+      </div>
+      <div style="margin-top:10px;"><button class="btn sm" id="mcAdd"><i class="fa-solid fa-plus"></i>追加</button></div>
+      <div id="mcList" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-handshake"></i>IPコラボ先</h3>
+      <div class="row">
+        <div><label>IP名</label><input type="text" id="miName" placeholder="例：水戸ホーリーホック"></div>
+        <div><label>公式ハンドル（@なし・任意）</label><input type="text" id="miHandle" placeholder="例：mito_hollyhock"></div>
+        <div><label>ジャンル（カテゴリ・複数可）</label><select id="miGenres" multiple size="3"></select></div>
+      </div>
+      <div style="margin-top:10px;"><button class="btn sm" id="miAdd"><i class="fa-solid fa-plus"></i>追加</button></div>
+      <div id="miList" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-tags"></i>カテゴリ（ジャンル）</h3>
+      <div class="row">
+        <div><label>新しいカテゴリ</label><input type="text" id="mgName" placeholder="例：アニメ / VTuber"></div>
+        <div style="display:flex;align-items:flex-end;max-width:120px"><button class="btn sm" id="mgAdd"><i class="fa-solid fa-plus"></i>追加</button></div>
+      </div>
+      <div class="chips" id="mgList" style="margin-top:12px;"></div>
+    </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-database"></i>データ管理</h3>
+      <p class="small">データは <code>data.json</code> に自動保存されています。手動バックアップ/復元もできます。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn sec sm" id="dExport"><i class="fa-solid fa-download"></i>JSON書き出し</button>
+        <label class="btn gray sm" style="cursor:pointer"><i class="fa-solid fa-upload"></i>JSON読み込み<input type="file" id="dImport" accept="application/json" style="display:none"></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ WF生成（ワイヤーフレーム生成プロンプト） -->
+  <section id="view-wf" class="view">
+    <div class="card">
+      <h2><i class="fa-solid fa-pen-ruler"></i>ワイヤーフレーム生成プロンプト</h2>
+      <p class="muted">Claudeにそのまま貼れる「ワイヤーフレーム生成プロンプト」を作ります。ルールを覚えさせれば、次回からは「ワイヤーをつくって」だけでOK。</p>
+      <p class="small">出典：@hiroho150cm「ワイヤーフレームプロンプト【コピペ用】｜Claudeに『ルール』をおぼえさせる指示つき」。ルール文は記事のものをそのまま使用しています。</p>
+
+      <div class="row" style="margin-top:6px;align-items:center;">
+        <label class="toggle"><input type="radio" name="wfMode" id="wfModeSkill" checked> スキル登録用（初回の1回・推奨）</label>
+        <label class="toggle"><input type="radio" name="wfMode" id="wfModeSingle"> このまま単発で作る</label>
+      </div>
+
+      <div id="wfSingleOpts" style="display:none;">
+        <label style="margin-top:8px;display:block;">作るもの／掲載情報（任意・貼り付け）</label>
+        <textarea id="wfDesc" placeholder="例：◯◯アプリの紹介LP。/ または掲載したい原稿・情報をそのまま貼り付け"></textarea>
+        <div class="row" style="margin-top:8px;align-items:center;">
+          <label class="toggle"><input type="checkbox" id="wfKeepText" checked> テキストは変えないで</label>
+          <label class="toggle"><input type="checkbox" id="wfBreaks" checked> 違和感のない改行にして</label>
+        </div>
+      </div>
+
+      <h3>生成されたプロンプト（編集可）</h3>
+      <textarea id="wfPrompt" class="qbox" style="min-height:260px;color:#d9e6f0;background:#0f1419;border:0;"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="wfGen"><i class="fa-solid fa-wand-magic-sparkles"></i>生成</button>
+        <button class="btn gray" id="wfCopy"><i class="fa-regular fa-copy"></i>プロンプトをコピー</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>使い方</h3>
+      <p class="small"><b>スキル登録（初回）：</b>上のプロンプトをコピーしてClaudeのチャットに貼ると、スキル用のファイル（ZIP）が用意されます。チャットに出る「保存」ボタンを押せば登録完了。次からは「ワイヤーをつくって」だけでOKです。<br>※スキル機能は Pro・Max などの有料プランで使えます。</p>
+      <p class="small"><b>単発で作る：</b>「このまま単発で作る」を選び、掲載情報を貼り付けてコピー → Claudeに渡すと、その場でHTMLのワイヤーフレームが出ます。</p>
+      <p class="small"><b>複数ページのサイト：</b>チャットのプレビューはHTMLの切替が苦手なので、デスクトップにフォルダを用意して <b>Claude Code</b> でまとめて管理すると、複数HTMLをきれいに編集できます。</p>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+// ---------- 状態 ----------
+let state = {competitors:[],ips:[],categories:[],campaigns:[],vocs:[]};
+const $ = (id)=>document.getElementById(id);
+const esc = (s)=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = ()=> Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+// ---------- 保存（debounce） ----------
+let saveTimer=null;
+function markSaving(){ $("saveState").textContent="保存中…"; }
+function scheduleSave(){
+  markSaving();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(doSave,400);
+}
+async function doSave(){
+  try{
+    await fetch("/api/data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});
+    $("saveState").textContent="保存済み ✓ (data.json)";
+  }catch(e){ $("saveState").textContent="保存失敗（サーバー未起動?）"; }
+}
+async function loadData(){
+  try{
+    const r=await fetch("/api/data"); const d=await r.json();
+    state=Object.assign({competitors:[],ips:[],categories:[],campaigns:[],vocs:[]},d);
+    $("saveState").textContent="保存済み ✓ (data.json)";
+  }catch(e){ $("saveState").textContent="読み込み失敗"; }
+  renderAll();
+}
+
+// ---------- ヘルパ ----------
+const compById=(id)=> state.competitors.find(c=>c.id===id);
+const ipById=(id)=> state.ips.find(i=>i.id===id);
+const campById=(id)=> state.campaigns.find(c=>c.id===id);
+function spellings(comp){ return (comp&&comp.kisekae&&comp.kisekae.length)?comp.kisekae:["きせかえ"]; }
+function fillSelect(el,items,opts){
+  opts=opts||{}; const cur=el.value;
+  let html = opts.blank?('<option value="">'+esc(opts.blank)+'</option>'):"";
+  items.forEach(it=> html+='<option value="'+esc(it.value)+'">'+esc(it.label)+'</option>');
+  el.innerHTML=html; if(cur) el.value=cur;
+}
+function compOptions(blank){
+  const items=state.competitors.map(c=>({value:c.id,label:(c.isSelf?"【自社】":"")+c.name}));
+  return {items,blank};
+}
+function ipOptions(blank){ return {items:state.ips.map(i=>({value:i.id,label:i.name})),blank}; }
+
+// ---------- タブ ----------
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    $("view-"+b.dataset.tab).classList.add("active");
+  });
+});
+
+// ---------- レンダリング全体 ----------
+function renderAll(){
+  // セレクト類
+  const co=compOptions(); fillSelect($("cSubject"),co.items); fillSelect($("impSubject"),co.items);
+  fillSelect($("sSubject"),compOptions("（主体を選択）").items,{blank:"（主体を選択）"});
+  fillSelect($("catSubjectFilter"),compOptions("すべての主体").items,{blank:"すべての主体"});
+  const io=ipOptions("（IPなし）"); fillSelect($("cIp"),io.items,{blank:"（IPなし）"});
+  fillSelect($("sIp"),io.items,{blank:"（IPなし）"});
+  fillSelect($("vCampaign"),{items:state.campaigns.map(c=>({value:c.id,label:campaignLabel(c)}))}.items,{blank:"（紐づけなし）"});
+  // genre multiselect
+  $("miGenres").innerHTML=state.categories.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join("");
+  renderDash(); renderCatalog(); renderVoc(); renderMaster(); buildQuery();
+}
+function campaignLabel(c){
+  const s=compById(c.subjectId), i=ipById(c.ipId);
+  return (s?s.name:"?")+" × "+(i?i.name:"-")+(c.kisekaeName?" / "+c.kisekaeName:"");
+}
+
+// ---------- ① ダッシュボード ----------
+function renderDash(){
+  const box=$("dashBody");
+  if(!state.competitors.length){ box.innerHTML='<div class="empty">まず「⑤ マスタ管理」で競合・自社を登録してください。</div>'; return; }
+  let html="";
+  state.competitors.forEach(c=>{
+    const camps=state.campaigns.filter(p=>p.subjectId===c.id);
+    const recentVoc=state.vocs.filter(v=>{const cp=campById(v.campaignId);return cp&&cp.subjectId===c.id;}).slice(-3).reverse();
+    html+='<div class="dash-comp"><div class="head"><span class="pill '+(c.isSelf?"self":"comp")+'">'+(c.isSelf?"自社":"競合")+'</span><b>'+esc(c.name)+'</b>'+
+          (c.handle?'<span class="small">@'+esc(c.handle)+'</span>':'')+'<span class="small">・施策 '+camps.length+'件</span></div>';
+    // 検索リンク
+    html+='<div class="linkrow">';
+    html+='<a class="btn sec sm" target="_blank" href="'+searchUrl(policyQuery(c,null,""),true)+'"><i class="fa-solid fa-arrow-up-right-from-square"></i>公式の施策を見る</a>';
+    html+='<a class="btn gray sm" target="_blank" href="'+searchUrl(voiceQuery(c,null,"",{lang:true,noRt:true}),true)+'"><i class="fa-regular fa-comment-dots"></i>生声(VOC)を見る</a>';
+    html+='</div>';
+    if(camps.length){
+      html+='<div style="margin-top:8px" class="small">直近の施策：'+camps.slice(-3).reverse().map(p=>{
+        const i=ipById(p.ipId); return esc((i?i.name:"-")+(p.kisekaeName?"／"+p.kisekaeName:""));
+      }).join(' ・ ')+'</div>';
+    }
+    if(recentVoc.length){
+      html+='<div style="margin-top:6px">'+recentVoc.map(v=>'<span class="pill '+esc(v.sentiment)+'" style="margin-right:6px">'+esc(v.sentiment)+'</span>'+esc(v.text.slice(0,40))).join('<br>')+'</div>';
+    }
+    html+='</div>';
+  });
+  box.innerHTML=html;
+}
+
+// ---------- クエリ生成 ----------
+function orSpellings(comp){
+  const sp=spellings(comp); return sp.length>1?("("+sp.join(" OR ")+")"):sp[0];
+}
+function policyQuery(comp,ip,extra){
+  // 公式告知：主体公式 or IP公式 から、きせかえ/コラボ
+  let froms=[];
+  if(comp&&comp.handle) froms.push("from:"+comp.handle.replace(/^@/,""));
+  if(ip&&ip.handle) froms.push("from:"+ip.handle.replace(/^@/,""));
+  let q="";
+  if(froms.length) q+= froms.length>1?("("+froms.join(" OR ")+")"):froms[0];
+  const kw = comp?orSpellings(comp):"きせかえ";
+  q+=" ("+kw+" OR コラボ)";
+  if(extra) q+=" "+extra.trim();
+  return q.trim();
+}
+function voiceQuery(comp,ip,extra,opt){
+  opt=opt||{};
+  let q="";
+  if(comp) q+='"'+comp.name+'"';
+  if(comp) q+=" "+orSpellings(comp);
+  if(ip) q+=' "'+ip.name+'"';
+  if(extra) q+=" "+extra.trim();
+  if(opt.lang) q+=" lang:ja";
+  if(opt.noRt) q+=" -filter:retweets";
+  if(opt.minFav) q+=" min_faves:"+opt.minFav;
+  return q.trim();
+}
+function searchUrl(q,live){
+  return "https://x.com/search?q="+encodeURIComponent(q)+"&f="+(live?"live":"top");
+}
+
+// ---------- ② カタログ ----------
+function metricsSummary(m){
+  if(!m) return "";
+  const parts=[];
+  if(m.rt) parts.push("RT"+m.rt); if(m.like) parts.push("♥"+m.like);
+  if(m.imp) parts.push("imp"+m.imp); if(m.followers) parts.push("F"+m.followers);
+  return parts.join(" / ");
+}
+function renderCatalog(){
+  fillSelect($("catSubjectFilter"),compOptions("すべての主体").items,{blank:"すべての主体"});
+  const mon=$("catMonth").value, subj=$("catSubjectFilter").value;
+  let rows=state.campaigns.slice().reverse();
+  if(subj) rows=rows.filter(c=>c.subjectId===subj);
+  if(mon) rows=rows.filter(c=>(c.releaseDate||"").slice(0,7)===mon || (c.endDate||"").slice(0,7)===mon);
+  const tb=$("catRows");
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="8" class="empty">該当する施策がありません。</td></tr>'; return; }
+  tb.innerHTML=rows.map(c=>{
+    const s=compById(c.subjectId), i=ipById(c.ipId);
+    const meta=[metricsSummary(c.metrics), c.vocNote?esc(c.vocNote):""].filter(Boolean).join(" ｜ ");
+    const url=c.metrics&&c.metrics.tweetUrl?'<a href="'+esc(c.metrics.tweetUrl)+'" target="_blank" class="small">🔗</a>':"";
+    return '<tr>'+
+      '<td>'+esc(s?s.name:"?")+(s&&s.isSelf?' <span class="pill self">自社</span>':'')+'</td>'+
+      '<td>'+esc(i?i.name:"-")+'</td>'+
+      '<td>'+esc(c.kisekaeName||"")+'</td>'+
+      '<td class="small">'+esc(c.releaseDate||"")+'</td>'+
+      '<td class="small">'+esc(c.endDate||"")+'</td>'+
+      '<td>'+(c.genres||[]).map(g=>'<span class="chip">'+esc(g)+'</span>').join(" ")+'</td>'+
+      '<td class="small">'+meta+' '+url+'</td>'+
+      '<td><button class="iconbtn" data-del-camp="'+c.id+'">削除</button></td>'+
+    '</tr>';
+  }).join("");
+  tb.querySelectorAll("[data-del-camp]").forEach(b=>b.onclick=()=>{
+    state.campaigns=state.campaigns.filter(x=>x.id!==b.dataset.delCamp); scheduleSave(); renderAll();
+  });
+}
+$("catMonth").addEventListener("change",renderCatalog);
+$("catSubjectFilter").addEventListener("change",renderCatalog);
+$("catClearFilter").onclick=()=>{ $("catMonth").value=""; $("catSubjectFilter").value=""; renderCatalog(); };
+$("cAdd").onclick=()=>{
+  const subj=$("cSubject").value; if(!subj){ alert("主体を選んでください（マスタ未登録なら先に登録）"); return; }
+  const ip=ipById($("cIp").value);
+  const camp={id:uid(),subjectId:subj,ipId:$("cIp").value||"",kisekaeName:$("cName").value.trim(),
+    releaseDate:$("cRelease").value,endDate:$("cEnd").value,
+    genres: ip?(ip.genres||[]).slice():[],
+    vocNote:$("cVoc").value.trim(),
+    metrics:{rt:$("cRt").value,like:$("cLike").value,imp:$("cImp").value,followers:$("cFollow").value,tweetUrl:$("cUrl").value.trim(),date:$("cMetricDate").value}};
+  state.campaigns.push(camp);
+  ["cName","cRelease","cEnd","cRt","cLike","cImp","cFollow","cUrl","cMetricDate","cVoc"].forEach(id=>$(id).value="");
+  scheduleSave(); renderAll();
+};
+$("catExport").onclick=()=>{
+  const head=["主体","IP","キセカエ名","リリース日","掲載終了日","ジャンル","RT","いいね","インプレッション","フォロワー","ツイートURL","VOCメモ"];
+  const lines=[head.join(",")];
+  state.campaigns.forEach(c=>{
+    const s=compById(c.subjectId),i=ipById(c.ipId),m=c.metrics||{};
+    const cells=[s?s.name:"",i?i.name:"",c.kisekaeName||"",c.releaseDate||"",c.endDate||"",(c.genres||[]).join("/"),m.rt||"",m.like||"",m.imp||"",m.followers||"",m.tweetUrl||"",(c.vocNote||"").replace(/\n/g," ")];
+    lines.push(cells.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(","));
+  });
+  downloadFile("﻿"+lines.join("\n"),"kisekae-catalog.csv","text/csv");
+};
+
+// 貼り付け取り込み
+function parseImport(text){
+  const out=[];
+  text.split(/\r?\n/).forEach(line=>{
+    if(!line.trim()) return;
+    const cols=line.indexOf("\t")>=0?line.split("\t"):line.split(",");
+    out.push({ip:(cols[0]||"").trim(),name:(cols[1]||"").trim(),release:(cols[2]||"").trim(),end:(cols[3]||"").trim()});
+  });
+  return out;
+}
+$("impPreview").onclick=()=>{
+  const rows=parseImport($("impText").value);
+  $("impResult").innerHTML= rows.length?("プレビュー "+rows.length+"件：<br>"+rows.slice(0,5).map(r=>esc(r.ip+" / "+r.name+" / "+r.release+" / "+r.end)).join("<br>")+(rows.length>5?"<br>…":"")):"取り込める行がありません。";
+};
+$("impRun").onclick=()=>{
+  const subj=$("impSubject").value; if(!subj){ alert("取り込み先の主体を選んでください"); return; }
+  const rows=parseImport($("impText").value); if(!rows.length){ $("impResult").textContent="取り込める行がありません。"; return; }
+  const autoIp=$("impAutoIp").checked; let added=0,newIps=0;
+  rows.forEach(r=>{
+    let ip=state.ips.find(i=>i.name===r.ip);
+    if(!ip && r.ip && autoIp){ ip={id:uid(),name:r.ip,handle:"",genres:[]}; state.ips.push(ip); newIps++; }
+    state.campaigns.push({id:uid(),subjectId:subj,ipId:ip?ip.id:"",kisekaeName:r.name,
+      releaseDate:normDate(r.release),endDate:normDate(r.end),genres:ip?(ip.genres||[]).slice():[],vocNote:"",
+      metrics:{rt:"",like:"",imp:"",followers:"",tweetUrl:"",date:""}});
+    added++;
+  });
+  $("impText").value=""; scheduleSave(); renderAll();
+  $("impResult").textContent="取り込み完了：施策 "+added+"件（新規IP "+newIps+"件）";
+};
+function normDate(s){
+  if(!s) return ""; s=s.trim().replace(/[年月]/g,"-").replace(/日/g,"").replace(/\//g,"-");
+  const m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/); if(!m) return s;
+  return m[1]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[3]).slice(-2);
+}
+
+// ---------- ③ 検索ビルダー ----------
+let searchMode="policy";
+document.querySelectorAll("#modeSeg button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#modeSeg button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); searchMode=b.dataset.mode; buildQuery();
+});
+["sSubject","sIp","sExtra","sPeriod","sSince","sUntil","sLang","sNoRt","sMinFavOn","sMinFav"].forEach(id=>{
+  $(id).addEventListener("input",()=>{ if(id==="sPeriod") applyPeriod(); buildQuery(); });
+  $(id).addEventListener("change",()=>{ if(id==="sPeriod") applyPeriod(); buildQuery(); });
+});
+function applyPeriod(){
+  const p=$("sPeriod").value; if(p==="custom"||p===""){ if(p==="") {$("sSince").value="";$("sUntil").value="";} return; }
+  const now=new Date(); let since="",until="";
+  const fmt=d=>d.toISOString().slice(0,10);
+  if(p==="thismonth"){ since=fmt(new Date(now.getFullYear(),now.getMonth(),1)); }
+  else if(p==="lastmonth"){ since=fmt(new Date(now.getFullYear(),now.getMonth()-1,1)); until=fmt(new Date(now.getFullYear(),now.getMonth(),1)); }
+  else if(p==="30"||p==="90"){ const d=new Date(now); d.setDate(d.getDate()-parseInt(p)); since=fmt(d); }
+  $("sSince").value=since; $("sUntil").value=until;
+}
+function buildQuery(){
+  const comp=compById($("sSubject").value), ip=ipById($("sIp").value), extra=$("sExtra").value;
+  let q;
+  if(searchMode==="policy"){ q=policyQuery(comp,ip,extra); }
+  else {
+    q=voiceQuery(comp,ip,extra,{lang:$("sLang").checked,noRt:$("sNoRt").checked,minFav:$("sMinFavOn").checked?$("sMinFav").value:""});
+  }
+  const since=$("sSince").value, until=$("sUntil").value;
+  if(since) q+=" since:"+since; if(until) q+=" until:"+until;
+  $("sQuery").value=q.trim();
+}
+$("sOpen").onclick=()=>{ const live=$("fLive").checked; window.open(searchUrl($("sQuery").value,live),"_blank"); };
+$("sCopy").onclick=()=>{ navigator.clipboard.writeText($("sQuery").value); $("sCopy").textContent="コピー済 ✓"; setTimeout(()=>$("sCopy").textContent="クエリをコピー",1200); };
+
+// ---------- ④ VOC ----------
+$("vAdd").onclick=()=>{
+  const t=$("vText").value.trim(); if(!t){ alert("声の本文を入れてください"); return; }
+  const camp=campById($("vCampaign").value);
+  state.vocs.push({id:uid(),text:t,url:$("vUrl").value.trim(),sentiment:$("vSent").value,
+    campaignId:$("vCampaign").value||"",ipId:camp?camp.ipId:"",createdAt:new Date().toISOString()});
+  $("vText").value=""; $("vUrl").value=""; scheduleSave(); renderVoc();
+};
+$("vFilter").addEventListener("change",renderVoc);
+function renderVoc(){
+  fillSelect($("vCampaign"),{items:state.campaigns.map(c=>({value:c.id,label:campaignLabel(c)}))}.items,{blank:"（紐づけなし）"});
+  const f=$("vFilter").value;
+  let list=state.vocs.slice().reverse(); if(f) list=list.filter(v=>v.sentiment===f);
+  $("vCount").textContent="（"+list.length+"件）";
+  if(!list.length){ $("vList").innerHTML='<div class="empty">まだVOCがありません。</div>'; return; }
+  $("vList").innerHTML=list.map(v=>{
+    const cp=campById(v.campaignId);
+    return '<div style="border-bottom:1px solid var(--line);padding:9px 0">'+
+      '<span class="pill '+esc(v.sentiment)+'">'+esc(v.sentiment)+'</span> '+
+      (cp?'<span class="small">['+esc(campaignLabel(cp))+']</span>':'')+
+      '<div style="margin:4px 0">'+esc(v.text)+'</div>'+
+      (v.url?'<a class="small" target="_blank" href="'+esc(v.url)+'">元ポスト🔗</a> ':'')+
+      '<button class="iconbtn" data-del-voc="'+v.id+'">削除</button></div>';
+  }).join("");
+  $("vList").querySelectorAll("[data-del-voc]").forEach(b=>b.onclick=()=>{
+    state.vocs=state.vocs.filter(x=>x.id!==b.dataset.delVoc); scheduleSave(); renderVoc();
+  });
+}
+$("vCopyAll").onclick=()=>{
+  const f=$("vFilter").value; let list=state.vocs.slice(); if(f) list=list.filter(v=>v.sentiment===f);
+  const txt=list.map(v=>{const cp=campById(v.campaignId);return "["+v.sentiment+"]"+(cp?"("+campaignLabel(cp)+")":"")+" "+v.text+(v.url?" "+v.url:"");}).join("\n");
+  navigator.clipboard.writeText(txt); $("vCopyAll").textContent="コピー済 ✓"; setTimeout(()=>$("vCopyAll").textContent="全部コピー（報告下地）",1200);
+};
+
+// ---------- ⑤ マスタ ----------
+$("mcAdd").onclick=()=>{
+  const name=$("mcName").value.trim(); if(!name){ alert("名前を入れてください"); return; }
+  const kise=$("mcKisekae").value.split(",").map(s=>s.trim()).filter(Boolean);
+  state.competitors.push({id:uid(),name,handle:$("mcHandle").value.trim().replace(/^@/,""),
+    kisekae:kise.length?kise:["きせかえ"],isSelf:$("mcSelf").value==="true"});
+  ["mcName","mcHandle","mcKisekae"].forEach(id=>$(id).value=""); scheduleSave(); renderAll();
+};
+$("miAdd").onclick=()=>{
+  const name=$("miName").value.trim(); if(!name){ alert("IP名を入れてください"); return; }
+  const genres=Array.from($("miGenres").selectedOptions).map(o=>o.value);
+  state.ips.push({id:uid(),name,handle:$("miHandle").value.trim().replace(/^@/,""),genres});
+  ["miName","miHandle"].forEach(id=>$(id).value=""); scheduleSave(); renderAll();
+};
+$("mgAdd").onclick=()=>{
+  const g=$("mgName").value.trim(); if(!g) return;
+  if(!state.categories.includes(g)) state.categories.push(g);
+  $("mgName").value=""; scheduleSave(); renderAll();
+};
+function renderMaster(){
+  $("mcList").innerHTML = state.competitors.length? state.competitors.map(c=>
+    '<div style="border-bottom:1px solid var(--line);padding:7px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+    '<span class="pill '+(c.isSelf?"self":"comp")+'">'+(c.isSelf?"自社":"競合")+'</span><b>'+esc(c.name)+'</b>'+
+    (c.handle?'<span class="small">@'+esc(c.handle)+'</span>':'')+
+    '<span class="small">表記: '+esc(spellings(c).join("/"))+'</span>'+
+    '<button class="iconbtn" data-del-comp="'+c.id+'" style="margin-left:auto">削除</button></div>'
+  ).join("") : '<div class="empty">未登録</div>';
+  $("mcList").querySelectorAll("[data-del-comp]").forEach(b=>b.onclick=()=>{
+    if(!confirm("削除しますか？")) return;
+    state.competitors=state.competitors.filter(x=>x.id!==b.dataset.delComp); scheduleSave(); renderAll();
+  });
+  $("miList").innerHTML = state.ips.length? state.ips.map(i=>
+    '<div style="border-bottom:1px solid var(--line);padding:7px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+    '<b>'+esc(i.name)+'</b>'+(i.handle?'<span class="small">@'+esc(i.handle)+'</span>':'')+
+    (i.genres||[]).map(g=>'<span class="chip">'+esc(g)+'</span>').join(" ")+
+    '<button class="iconbtn" data-del-ip="'+i.id+'" style="margin-left:auto">削除</button></div>'
+  ).join("") : '<div class="empty">未登録</div>';
+  $("miList").querySelectorAll("[data-del-ip]").forEach(b=>b.onclick=()=>{
+    if(!confirm("削除しますか？")) return;
+    state.ips=state.ips.filter(x=>x.id!==b.dataset.delIp); scheduleSave(); renderAll();
+  });
+  $("mgList").innerHTML = state.categories.map(g=>
+    '<span class="chip">'+esc(g)+'<button data-del-genre="'+esc(g)+'">×</button></span>'
+  ).join("") || '<div class="empty">カテゴリ未登録</div>';
+  $("mgList").querySelectorAll("[data-del-genre]").forEach(b=>b.onclick=()=>{
+    state.categories=state.categories.filter(x=>x!==b.dataset.delGenre); scheduleSave(); renderAll();
+  });
+}
+
+// ---------- データ書き出し/読み込み ----------
+function downloadFile(content,name,type){
+  const blob=new Blob([content],{type:type||"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+$("dExport").onclick=()=> downloadFile(JSON.stringify(state,null,2),"kisekae-data.json","application/json");
+$("dImport").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=()=>{ try{ const d=JSON.parse(reader.result);
+    if(!confirm("現在のデータを読み込みデータで置き換えます。よろしいですか？")) return;
+    state=Object.assign({competitors:[],ips:[],categories:[],campaigns:[],vocs:[]},d); scheduleSave(); renderAll();
+  }catch(err){ alert("JSONの読み込みに失敗しました："+err.message); } };
+  reader.readAsText(f); e.target.value="";
+});
+
+// ---------- Xブックマークレット（記事=長文対応 / postMessage方式） ----------
+// X側で実行される本体。通常の関数として書き、toString()でブックマークレット化する
+function xIngestBookmarklet(ORIGIN){
+  function grab(){
+    var sel=(window.getSelection&&String(window.getSelection())||"").trim();
+    if(sel) return sel;                                  // 選択テキスト最優先
+    var c=['[data-testid="twitterArticleRichTextView"]','[data-testid="longformRichTextView"]','article'];
+    for(var i=0;i<c.length;i++){var n=document.querySelector(c[i]); if(n){var t=(n.innerText||"").trim(); if(t.length>40) return t;}}
+    var tt=document.querySelectorAll('[data-testid="tweetText"]');
+    if(tt.length){var a=[]; for(var j=0;j<tt.length;j++) a.push(tt[j].innerText); return a.join("\n\n");}
+    return document.title||"";
+  }
+  var h1=document.querySelector("h1");
+  var payload={type:"xingest", text:grab(), title:h1?(h1.innerText||"").trim():"", url:location.href};
+  function handler(e){
+    if(e.origin!==ORIGIN) return;
+    if(e.data&&e.data.type==="xingest-ready"){ e.source.postMessage(payload, ORIGIN); window.removeEventListener("message", handler); }
+  }
+  window.addEventListener("message", handler);
+  if(!window.open(ORIGIN+"/?ingest=1","_blank")) alert("ポップアップがブロックされました。許可してから再度お試しください。");
+}
+function setupBookmarklet(){
+  var code="("+xIngestBookmarklet.toString()+")("+JSON.stringify(location.origin)+")";
+  var el=$("bmLink"); if(el) el.href="javascript:"+code;   // javascript:URLは生コードのまま（encodeしない）
+}
+// ローカルツール側：X記事/投稿の本文を受信
+function setupIngestListener(){
+  window.addEventListener("message", function(e){
+    if(e.origin!=="https://x.com" && e.origin!=="https://twitter.com" && e.origin!=="https://mobile.twitter.com") return;
+    var d=e.data; if(!d || d.type!=="xingest") return;
+    var text=d.text||""; if(d.title && text.indexOf(d.title)<0) text=d.title+"\n\n"+text;
+    var btn=document.querySelector('.tabs button[data-tab="voc"]'); if(btn) btn.click();
+    $("vText").value=text; $("vUrl").value=d.url||"";
+    try{ $("vText").focus(); }catch(err){}
+  });
+}
+// 取り込み用に開かれたタブ：openerに「準備OK」を通知してデータを受け取る
+function announceReady(){
+  var p=new URLSearchParams(location.search);
+  if(!p.has("ingest")) return;
+  var btn=document.querySelector('.tabs button[data-tab="voc"]'); if(btn) btn.click();
+  history.replaceState(null,"",location.pathname);  // クエリ除去（二重取り込み防止）
+  if(window.opener){ try{ window.opener.postMessage({type:"xingest-ready"}, "*"); }catch(err){} }
+}
+
+// ---------- WF生成（ワイヤーフレーム生成プロンプト） ----------
+// ルール本文は @hiroho150cm の記事のまま（改変しない）
+var WF_RULES =
+"HTMLで、ワイヤーフレームを作成して。\n"+
+"以下のルールを、すべて守ってください。\n"+
+"\n"+
+"【レイアウト】\n"+
+"・読む負担を感じさせない、みてわかるレイアウトにして。\n"+
+"・洗練された、都会的でミニマルなレイアウトにして。\n"+
+"・余白とバランスは、ページ全体をうまく活用して。\n"+
+"・フォントは Noto Sans JP、やや小さめにして。\n"+
+"\n"+
+"【デザイン】\n"+
+"・色は「白・黒・グレー」だけにして。\n"+
+"・背景は基本白にして。全面が黒のページは作らないで。\n"+
+"・無駄な英語、線、シャドウなどの装飾は一切しないで。\n"+
+"・図や画像が必要な部分は、グレーボックスにして。\n"+
+"・アイコンは「Font Awesome」の無料版を使って。\n"+
+"\n"+
+"【ライティング】\n"+
+"・1文を、やや短くして。読点を1文に最低1度は使って。\n"+
+"・1〜2文ごとに、段落を分けて。\n"+
+"・漢字は違和感がない程度に、ひらがなにして。（例：行う=おこなう）\n"+
+"・強調したい名称やセリフには、記号「」を活用して。\n"+
+"・誤字や脱字は直して、ですます口調に統一して。";
+
+function buildWfPrompt(){
+  var single = $("wfModeSingle") && $("wfModeSingle").checked;
+  var out;
+  if(!single){
+    out = "以下は、ワイヤーフレーム用プロンプトです。これをスキルにしてください。\n\n" + WF_RULES;
+  }else{
+    var extra = "";
+    if($("wfKeepText") && $("wfKeepText").checked) extra += "\n・テキストは変えないで。";
+    if($("wfBreaks") && $("wfBreaks").checked) extra += "\n・違和感のない改行にして。";
+    out = WF_RULES + extra;
+    var desc = ($("wfDesc") && $("wfDesc").value || "").trim();
+    if(desc) out += "\n\n【作るもの／掲載情報】\n" + desc;
+  }
+  if($("wfPrompt")) $("wfPrompt").value = out;
+}
+
+function setupWf(){
+  if(!$("wfPrompt")) return;
+  var opts = $("wfSingleOpts");
+  function syncMode(){ if(opts) opts.style.display = ($("wfModeSingle").checked ? "block" : "none"); buildWfPrompt(); }
+  ["wfModeSkill","wfModeSingle"].forEach(function(id){ if($(id)) $(id).addEventListener("change", syncMode); });
+  ["wfDesc","wfKeepText","wfBreaks"].forEach(function(id){
+    var el=$(id); if(!el) return;
+    el.addEventListener("input", buildWfPrompt); el.addEventListener("change", buildWfPrompt);
+  });
+  $("wfGen").onclick = buildWfPrompt;
+  $("wfCopy").onclick = function(){
+    navigator.clipboard.writeText($("wfPrompt").value);
+    $("wfCopy").textContent="コピー済 ✓"; setTimeout(function(){ $("wfCopy").textContent="プロンプトをコピー"; },1200);
+  };
+  syncMode();
+}
+
+// ---------- 起動 ----------
+setupBookmarklet();
+setupIngestListener();
+announceReady();
+setupWf();
+loadData();
+</script>
+</body>
+</html>

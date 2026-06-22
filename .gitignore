@@ -23,11 +23,17 @@ build/
 # Cache
 .cache/
 
-# Claude Code
-.claude/
+# Claude Code（ローカル設定は無視。共有スキルだけは追跡する）
+.claude/*
+!.claude/skills/
 
 # Source file (keep local only, encrypted version is index.html)
 x-search-generator.html
 
 # Password hash (local only, never commit)
 .pwdhash
+
+# Workbench private data (never commit your research data)
+workbench/data.json
+workbench/data.json.tmp
+workbench/data.json.corrupt
