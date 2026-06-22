@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>きせかえ競合インテリジェンス・ワークベンチ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
   :root{--ink:#0f1419;--sub:#536471;--line:#e2e8ee;--bg:#f6f8fa;--x:#1da1f2;--accent:#7856ff;--ok:#137333;--warn:#a05a00;--bad:#c0166b;--chip:#eef0ff;}
   *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;}
+  body{margin:0;font-family:"Noto Sans JP",-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;}
   a{color:var(--x);}
   .topbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#7856ff,#1da1f2);color:#fff;padding:7px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.12);}
   .topbar h1{font-size:.92rem;margin:0;font-weight:700;}
@@ -53,7 +57,11 @@
   .small{font-size:.78rem;color:var(--sub);}
   .hint{background:#fff8ec;border:1px solid #f6e2a8;border-radius:10px;padding:10px 12px;font-size:.82rem;margin-top:10px;}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;}
+  .colgrid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  h2 i,h3 i,.btn i,.tabs button i,.seg button i{margin-right:6px;}
+  @media(max-width:640px){.grid2,.grid3,.colgrid2{grid-template-columns:1fr;}}
   .iconbtn{border:0;background:none;cursor:pointer;color:var(--sub);font-size:.85rem;padding:2px 6px;}
   .iconbtn:hover{color:var(--accent);}
 </style>
@@ -64,19 +72,19 @@
   <span class="save" id="saveState">読み込み中…</span>
 </div>
 <div class="tabs">
-  <button data-tab="dash" class="active">① ダッシュ</button>
-  <button data-tab="catalog">② カタログ</button>
-  <button data-tab="search">③ 検索</button>
-  <button data-tab="voc">④ VOC</button>
-  <button data-tab="master">⑤ マスタ</button>
-  <button data-tab="wf">⑥ WF生成</button>
+  <button data-tab="dash" class="active"><i class="fa-solid fa-gauge-high"></i>① ダッシュ</button>
+  <button data-tab="catalog"><i class="fa-solid fa-table-list"></i>② カタログ</button>
+  <button data-tab="search"><i class="fa-solid fa-magnifying-glass"></i>③ 検索</button>
+  <button data-tab="voc"><i class="fa-regular fa-comments"></i>④ VOC</button>
+  <button data-tab="master"><i class="fa-solid fa-sliders"></i>⑤ マスタ</button>
+  <button data-tab="wf"><i class="fa-solid fa-pen-ruler"></i>⑥ WF生成</button>
 </div>
 
 <div class="wrap">
   <!-- ① DASHBOARD -->
   <section id="view-dash" class="view active">
     <div class="card">
-      <h2>ダッシュボード</h2>
+      <h2><i class="fa-solid fa-gauge-high"></i>ダッシュボード</h2>
       <p class="muted">競合・自社ごとに、きせかえ施策の検索リンクと登録済みの施策・最近のVOCをまとめます。リンクはワンクリックでXが開きます。</p>
       <div id="dashBody"></div>
     </div>
@@ -85,14 +93,14 @@
   <!-- ② CATALOG -->
   <section id="view-catalog" class="view">
     <div class="card">
-      <h2>定量カタログ（施策レコード）</h2>
+      <h2><i class="fa-solid fa-table-list"></i>定量カタログ（施策レコード）</h2>
       <p class="muted">主体 × IP × キセカエ名 × 期間。Vポイント等は Easy Scraper で抽出して貼り付け取り込み。月で絞り込み・CSV書き出し可。</p>
-      <div class="row">
+      <div class="toolbar">
         <div><label>月で絞り込み</label><input type="month" id="catMonth"></div>
         <div><label>主体で絞り込み</label><select id="catSubjectFilter"></select></div>
         <div style="display:flex;align-items:flex-end;gap:8px;">
-          <button class="btn gray sm" id="catClearFilter">絞り込み解除</button>
-          <button class="btn sec sm" id="catExport">CSV書き出し</button>
+          <button class="btn gray sm" id="catClearFilter"><i class="fa-solid fa-filter-circle-xmark"></i>絞り込み解除</button>
+          <button class="btn sec sm" id="catExport"><i class="fa-solid fa-file-csv"></i>CSV書き出し</button>
         </div>
       </div>
       <div class="tablewrap" style="margin-top:12px;">
@@ -106,7 +114,7 @@
     </div>
 
     <div class="card">
-      <h3>施策を1件追加</h3>
+      <h3><i class="fa-solid fa-plus"></i>施策を1件追加</h3>
       <div class="row">
         <div><label>主体（競合/自社）</label><select id="cSubject"></select></div>
         <div><label>IP（コラボ先）</label><select id="cIp"></select></div>
@@ -129,11 +137,11 @@
       </div>
       <label>VOCメモ（任意）</label>
       <textarea id="cVoc" placeholder="効果メモ・反応の要約など"></textarea>
-      <div style="margin-top:12px;"><button class="btn" id="cAdd">＋ カタログに追加</button></div>
+      <div style="margin-top:12px;"><button class="btn" id="cAdd"><i class="fa-solid fa-plus"></i>カタログに追加</button></div>
     </div>
 
     <div class="card">
-      <h3>貼り付け取り込み（Easy Scraper 等）</h3>
+      <h3><i class="fa-solid fa-paste"></i>貼り付け取り込み（Easy Scraper 等）</h3>
       <p class="small">1行＝1施策。<b>タブ または カンマ区切り</b>で <code>IP名 / キセカエ名 / リリース日 / 掲載終了日</code> の順。日付は空でもOK。主体は下で選んだものに揃えます。</p>
       <div class="row">
         <div><label>取り込み先（主体）</label><select id="impSubject"></select></div>
@@ -144,8 +152,8 @@
       <label>貼り付けエリア</label>
       <textarea id="impText" style="min-height:120px" placeholder="水戸ホーリーホック&#9;会場限定きせかえ&#9;2026-06-01&#9;2026-06-30&#10;○○アイドル, スペシャルきせかえ, 2026-06-10, 2026-07-10"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn sec" id="impPreview">プレビュー</button>
-        <button class="btn" id="impRun">取り込む</button>
+        <button class="btn sec" id="impPreview"><i class="fa-solid fa-eye"></i>プレビュー</button>
+        <button class="btn" id="impRun"><i class="fa-solid fa-paste"></i>取り込む</button>
       </div>
       <div id="impResult" class="small" style="margin-top:8px;"></div>
     </div>
@@ -154,7 +162,7 @@
   <!-- ③ SEARCH -->
   <section id="view-search" class="view">
     <div class="card">
-      <h2>検索ビルダー</h2>
+      <h2><i class="fa-solid fa-magnifying-glass"></i>検索ビルダー</h2>
       <p class="muted">表記ゆれ（きせかえ/キセカエ）を自動で反映。施策（公式告知）か生声（ユーザーの声）を切替えてXを開きます。</p>
       <div style="margin:6px 0 4px;">
         <span class="seg" id="modeSeg">
@@ -193,8 +201,8 @@
       <h3>生成されたクエリ（編集可）</h3>
       <textarea id="sQuery" class="qbox" style="min-height:70px;color:#d9e6f0;background:#0f1419;border:0;"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn x" id="sOpen">Xで検索を開く</button>
-        <button class="btn gray" id="sCopy">クエリをコピー</button>
+        <button class="btn x" id="sOpen"><i class="fa-brands fa-x-twitter"></i>Xで検索を開く</button>
+        <button class="btn gray" id="sCopy"><i class="fa-regular fa-copy"></i>クエリをコピー</button>
       </div>
       <div class="hint">ヒント：0件なら条件をゆるめる（追加KW削除・期間/いいね下限オフ）。ORは大文字・記号は半角・Xはログイン必須。</div>
     </div>
@@ -202,8 +210,9 @@
 
   <!-- ④ VOC -->
   <section id="view-voc" class="view">
+    <div class="colgrid2">
     <div class="card">
-      <h2>VOC収集</h2>
+      <h2><i class="fa-regular fa-comments"></i>VOC収集</h2>
       <p class="muted">拾った生声を賛否タグ付きで蓄積。後で施策・IPごとに見返せます。</p>
       <label>声の本文（コピペ）</label>
       <textarea id="vText" placeholder="ユーザーの声を貼り付け"></textarea>
@@ -216,11 +225,21 @@
         </div>
         <div><label>紐づく施策（任意）</label><select id="vCampaign"></select></div>
       </div>
-      <div style="margin-top:12px;"><button class="btn" id="vAdd">＋ VOCを追加</button></div>
+      <div style="margin-top:12px;"><button class="btn" id="vAdd"><i class="fa-solid fa-plus"></i>VOCを追加</button></div>
     </div>
 
     <div class="card">
-      <h3>Xから取り込み（ブックマークレット）</h3>
+      <h3><i class="fa-solid fa-list"></i>収集済みVOC <span class="small" id="vCount"></span></h3>
+      <div class="row" style="margin-bottom:10px;">
+        <div><label>賛否で絞る</label><select id="vFilter"><option value="">すべて</option><option>好評</option><option>不満</option><option>会員登録した</option><option>要注目</option></select></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn sec sm" id="vCopyAll"><i class="fa-regular fa-copy"></i>全部コピー（報告下地）</button></div>
+      </div>
+      <div id="vList"></div>
+    </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-download"></i>Xから取り込み（ブックマークレット）</h3>
       <p class="small">下のボタンを<b>ブックマークバーにドラッグ</b>して登録 → Xで読みたい<b>投稿や記事のページ</b>を開き、ログインした状態でこのブックマークを押すと、<b>本文（記事は全文）とURLがこのツールに取り込まれ</b>、VOCタブに自動で入ります（賛否タグを選んで「＋ VOCを追加」で保存）。</p>
       <p style="margin:10px 0"><a id="bmLink" class="btn x" href="#" onclick="return false;" draggable="true">📥 Xの投稿・記事を取り込み</a></p>
       <div class="hint">
@@ -231,26 +250,18 @@
         ・うまく取れない時は本文を手動で貼り付けてください。ブックマークバーが無ければ Chrome は <code>Ctrl/⌘+Shift+B</code> で表示できます。
       </div>
     </div>
-
-    <div class="card">
-      <h3>収集済みVOC <span class="small" id="vCount"></span></h3>
-      <div class="row" style="margin-bottom:10px;">
-        <div><label>賛否で絞る</label><select id="vFilter"><option value="">すべて</option><option>好評</option><option>不満</option><option>会員登録した</option><option>要注目</option></select></div>
-        <div style="display:flex;align-items:flex-end;"><button class="btn sec sm" id="vCopyAll">全部コピー（報告下地）</button></div>
-      </div>
-      <div id="vList"></div>
-    </div>
   </section>
 
   <!-- ⑤ MASTER -->
   <section id="view-master" class="view">
     <div class="card">
-      <h2>マスタ管理</h2>
+      <h2><i class="fa-solid fa-sliders"></i>マスタ管理</h2>
       <p class="muted">競合・自社（決済アプリ）／ IPコラボ先 ／ カテゴリ（ジャンル）を自由に登録・編集します。</p>
     </div>
 
+    <div class="grid3">
     <div class="card">
-      <h3>競合・自社（決済アプリ）</h3>
+      <h3><i class="fa-solid fa-building"></i>競合・自社（決済アプリ）</h3>
       <div class="row">
         <div><label>名前</label><input type="text" id="mcName" placeholder="例：PayPay / d払い"></div>
         <div><label>公式ハンドル（@なし）</label><input type="text" id="mcHandle" placeholder="例：PayPayOfficial"></div>
@@ -259,36 +270,37 @@
           <select id="mcSelf"><option value="false">競合</option><option value="true">自社</option></select>
         </div>
       </div>
-      <div style="margin-top:10px;"><button class="btn sm" id="mcAdd">＋ 追加</button></div>
+      <div style="margin-top:10px;"><button class="btn sm" id="mcAdd"><i class="fa-solid fa-plus"></i>追加</button></div>
       <div id="mcList" style="margin-top:12px;"></div>
     </div>
 
     <div class="card">
-      <h3>IPコラボ先</h3>
+      <h3><i class="fa-solid fa-handshake"></i>IPコラボ先</h3>
       <div class="row">
         <div><label>IP名</label><input type="text" id="miName" placeholder="例：水戸ホーリーホック"></div>
         <div><label>公式ハンドル（@なし・任意）</label><input type="text" id="miHandle" placeholder="例：mito_hollyhock"></div>
         <div><label>ジャンル（カテゴリ・複数可）</label><select id="miGenres" multiple size="3"></select></div>
       </div>
-      <div style="margin-top:10px;"><button class="btn sm" id="miAdd">＋ 追加</button></div>
+      <div style="margin-top:10px;"><button class="btn sm" id="miAdd"><i class="fa-solid fa-plus"></i>追加</button></div>
       <div id="miList" style="margin-top:12px;"></div>
     </div>
 
     <div class="card">
-      <h3>カテゴリ（ジャンル）</h3>
+      <h3><i class="fa-solid fa-tags"></i>カテゴリ（ジャンル）</h3>
       <div class="row">
         <div><label>新しいカテゴリ</label><input type="text" id="mgName" placeholder="例：アニメ / VTuber"></div>
-        <div style="display:flex;align-items:flex-end;max-width:120px"><button class="btn sm" id="mgAdd">＋ 追加</button></div>
+        <div style="display:flex;align-items:flex-end;max-width:120px"><button class="btn sm" id="mgAdd"><i class="fa-solid fa-plus"></i>追加</button></div>
       </div>
       <div class="chips" id="mgList" style="margin-top:12px;"></div>
     </div>
+    </div>
 
     <div class="card">
-      <h3>データ管理</h3>
+      <h3><i class="fa-solid fa-database"></i>データ管理</h3>
       <p class="small">データは <code>data.json</code> に自動保存されています。手動バックアップ/復元もできます。</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn sec sm" id="dExport">JSON書き出し</button>
-        <label class="btn gray sm" style="cursor:pointer">JSON読み込み<input type="file" id="dImport" accept="application/json" style="display:none"></label>
+        <button class="btn sec sm" id="dExport"><i class="fa-solid fa-download"></i>JSON書き出し</button>
+        <label class="btn gray sm" style="cursor:pointer"><i class="fa-solid fa-upload"></i>JSON読み込み<input type="file" id="dImport" accept="application/json" style="display:none"></label>
       </div>
     </div>
   </section>
@@ -296,7 +308,7 @@
   <!-- ⑥ WF生成（ワイヤーフレーム生成プロンプト） -->
   <section id="view-wf" class="view">
     <div class="card">
-      <h2>ワイヤーフレーム生成プロンプト</h2>
+      <h2><i class="fa-solid fa-pen-ruler"></i>ワイヤーフレーム生成プロンプト</h2>
       <p class="muted">Claudeにそのまま貼れる「ワイヤーフレーム生成プロンプト」を作ります。ルールを覚えさせれば、次回からは「ワイヤーをつくって」だけでOK。</p>
       <p class="small">出典：@hiroho150cm「ワイヤーフレームプロンプト【コピペ用】｜Claudeに『ルール』をおぼえさせる指示つき」。ルール文は記事のものをそのまま使用しています。</p>
 
@@ -317,8 +329,8 @@
       <h3>生成されたプロンプト（編集可）</h3>
       <textarea id="wfPrompt" class="qbox" style="min-height:260px;color:#d9e6f0;background:#0f1419;border:0;"></textarea>
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn" id="wfGen">生成</button>
-        <button class="btn gray" id="wfCopy">プロンプトをコピー</button>
+        <button class="btn" id="wfGen"><i class="fa-solid fa-wand-magic-sparkles"></i>生成</button>
+        <button class="btn gray" id="wfCopy"><i class="fa-regular fa-copy"></i>プロンプトをコピー</button>
       </div>
     </div>
 
@@ -419,8 +431,8 @@ function renderDash(){
           (c.handle?'<span class="small">@'+esc(c.handle)+'</span>':'')+'<span class="small">・施策 '+camps.length+'件</span></div>';
     // 検索リンク
     html+='<div class="linkrow">';
-    html+='<a class="btn sec sm" target="_blank" href="'+searchUrl(policyQuery(c,null,""),true)+'">公式の施策を見る</a>';
-    html+='<a class="btn gray sm" target="_blank" href="'+searchUrl(voiceQuery(c,null,"",{lang:true,noRt:true}),true)+'">生声(VOC)を見る</a>';
+    html+='<a class="btn sec sm" target="_blank" href="'+searchUrl(policyQuery(c,null,""),true)+'"><i class="fa-solid fa-arrow-up-right-from-square"></i>公式の施策を見る</a>';
+    html+='<a class="btn gray sm" target="_blank" href="'+searchUrl(voiceQuery(c,null,"",{lang:true,noRt:true}),true)+'"><i class="fa-regular fa-comment-dots"></i>生声(VOC)を見る</a>';
     html+='</div>';
     if(camps.length){
       html+='<div style="margin-top:8px" class="small">直近の施策：'+camps.slice(-3).reverse().map(p=>{
