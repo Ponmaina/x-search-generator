@@ -71,7 +71,7 @@ class Handler(BaseHTTPRequestHandler):
             body = json.dumps(load_data(), ensure_ascii=False).encode("utf-8")
             self._send(200, body)
             return
-        if self.path in ("/", "/index.html"):
+        if self.path.split("?")[0] in ("/", "/index.html"):
             try:
                 with open(INDEX_PATH, "rb") as f:
                     body = f.read()
