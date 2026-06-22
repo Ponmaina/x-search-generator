@@ -31,3 +31,8 @@ x-search-generator.html
 
 # Password hash (local only, never commit)
 .pwdhash
+
+# Workbench private data (never commit your research data)
+workbench/data.json
+workbench/data.json.tmp
+workbench/data.json.corrupt
