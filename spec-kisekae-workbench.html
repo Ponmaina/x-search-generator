@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>統合スペック｜きせかえ競合インテリジェンス・ワークベンチ</title>
+<style>
+  :root{--ink:#0f1419;--sub:#536471;--line:#e2e8ee;--bg:#f6f8fa;--x:#1da1f2;--accent:#7856ff;--ok:#137333;--warn:#a05a00;--bad:#c0166b;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7;}
+  .wrap{max-width:1020px;margin:0 auto;padding:24px 18px 90px;}
+  header.hero{background:linear-gradient(135deg,#7856ff,#1da1f2);color:#fff;border-radius:18px;padding:30px 28px;box-shadow:0 12px 30px rgba(86,73,160,.22);}
+  header.hero .ey{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9;}
+  header.hero h1{margin:6px 0 8px;font-size:1.65rem;}
+  header.hero p{margin:0;opacity:.94;font-size:.95rem;}
+  section{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:22px;box-shadow:0 2px 10px rgba(15,20,25,.04);}
+  h2{font-size:1.2rem;margin:0 0 14px;padding-bottom:10px;border-bottom:2px solid var(--line);}
+  h2 .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;font-size:.85rem;margin-right:8px;vertical-align:middle;}
+  h3{font-size:1rem;margin:16px 0 6px;}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;}
+  td,th{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:.78rem;color:var(--sub);}
+  .persona td:first-child{width:26%;color:var(--sub);font-weight:600;}
+  .pos{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .pos .card{border-radius:12px;padding:14px 16px;font-size:.9rem;}
+  .pos .no{background:#fdeef3;border:1px solid #f6c9da;} .pos .no b{color:var(--bad);}
+  .pos .yes{background:#e9f7ee;border:1px solid #b9e3c6;} .pos .yes b{color:var(--ok);}
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .flow .s{background:#f0ecff;border:1px solid #d8cdfb;border-radius:12px;padding:12px;font-size:.84rem;}
+  .flow .s b{display:block;color:var(--accent);margin-bottom:3px;}
+  .model{background:#0f1419;color:#d9e6f0;border-radius:12px;padding:16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.84rem;white-space:pre-wrap;overflow:auto;}
+  .screens .row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);}
+  .screens .row b{flex:0 0 170px;}
+  code{background:#eef3f6;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.85em;}
+  .q{background:linear-gradient(135deg,#eef7ff,#fff);border:1px solid #cfe6ff;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+  .q .ttl{font-weight:700;color:var(--x);margin-bottom:4px;}
+  .verdict{font-weight:700;}.verdict.y{color:var(--ok);}.verdict.c{color:var(--warn);}
+  .caveat{background:#fff8ec;border:1px solid #f6e2a8;border-radius:12px;padding:13px 16px;font-size:.88rem;margin-top:14px;}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;border-radius:999px;padding:2px 9px;margin-right:5px;}
+  .t-q{background:#e9f7ee;color:#137333;} .t-v{background:#eef0ff;color:#5b3ed6;} .t-n{background:#f0f3f5;color:#536471;}
+  ul{margin:6px 0;padding-left:20px;} li{margin:3px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="ey">5専門家パネル統合スペック（戦略・マーケ・UI/UX・システム・セキュリティ）</div>
+    <h1>きせかえ競合インテリジェンス・ワークベンチ</h1>
+    <p>決済アプリの「きせかえ×IPコラボ施策」を、定量カタログ＋定性VOC＋数字メモで月次収集。設定1回・起動不要・コスト0。</p>
+  </header>
+
+  <!-- 0 サマリ -->
+  <section>
+    <h2><span class="n">0</span>これは何か（一言で）</h2>
+    <p><b>汎用のX検索ツールではありません。</b>「決済アプリ × きせかえIPコラボ施策」に特化し、<b>&#9312;競合・自社の施策カタログ（定量）</b>と<b>&#9313;ユーザーの生声VOC（定性）</b>と<b>&#9314;Xの数字メモ</b>を1枚のローカルWebツールで回し、<b>毎月の競合動向レポートと自社の次の打ち手判断</b>を最短で支える「月次競合インテリジェンス・ワークベンチ」です。</p>
+  </section>
+
+  <!-- 1 ペルソナ -->
+  <section>
+    <h2><span class="n">1</span>ペルソナ（確定）</h2>
+    <table class="persona">
+      <tr><td>役割</td><td><b>ドコモ系・d払い／dポイントのマーケ／企画担当</b></td></tr>
+      <tr><td>ミッション</td><td>毎月、競合決済アプリ（PayPay・楽天ペイ・au PAY・Vポイント 等）と自社の「きせかえ×IPコラボ施策」を把握し、<b>効果（VOC・数字）を見極め</b>、経営層に競合動向レポートを出し、<b>自社の次のきせかえ施策の打ち手</b>を決める材料にする</td></tr>
+      <tr><td>現状の動き</td><td>Xを目視で探す &rarr; 反応の多い声を選ぶ &rarr; コラボ名/反応テーマを拾う &rarr; 分類 &rarr; レポート（全工程が手動）</td></tr>
+      <tr><td>ペイン</td><td>&#9312;探すのに時間 &#9313;毎回クエリを考える &#9314;集めた声・施策が散らかる &#9315;競合/IPが増えると探せない &#9316;一覧のない競合は手動が重い &#9317;<b>表記ゆれ（きせかえ/キセカエ）で取りこぼす</b></td></tr>
+      <tr><td>嬉しい状態</td><td>探す時間が激減し、<b>読む・意味づけ・提案に集中</b>できる</td></tr>
+    </table>
+  </section>
+
+  <!-- 2 フィット -->
+  <section>
+    <h2><span class="n">2</span>何にフィットするか（ポジショニング）</h2>
+    <div class="pos">
+      <div class="card no"><b>&#10007; フィットしない使い方</b><ul>
+        <li>リアルタイムの炎上監視・即時アラート</li>
+        <li>厳密な定量分析（正確な件数・推移の自動集計）</li>
+        <li>不特定多数の一般ワードのSNS分析</li>
+      </ul><small>&rarr; それはAPI/有料ソーシャルリスニングの領域</small></div>
+      <div class="card yes"><b>&#9678; ぴったりの使い方</b><ul>
+        <li><b>月1</b>の競合きせかえ施策の棚卸し</li>
+        <li>施策ごとの<b>生声VOC＋ざっくりの勢い</b>の把握</li>
+        <li>IPジャンル（スポーツ/エンタメ）での<b>整理・見返し</b></li>
+        <li>経営報告と<b>次の打ち手</b>の材料づくり</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <!-- 3 目的達成ロジック -->
+  <section>
+    <h2><span class="n">3</span>なぜ目的を達成できるか</h2>
+    <div class="flow">
+      <div class="s"><b>探す（時間&darr;）</b>競合×表記ゆれ×期間のクエリを自動生成。ダッシュからワンクリック</div>
+      <div class="s"><b>溜める</b>施策＝定量カタログ、生声＝VOC収集、数字＝手メモ。1か所に集約</div>
+      <div class="s"><b>整理</b>IPジャンルで自由カテゴリ分け &rarr; 後から探せる</div>
+      <div class="s"><b>出す</b>月で絞って書き出し &rarr; 報告下地に</div>
+    </div>
+    <p style="margin-top:12px;">核心は<b>「探す時間&darr; &rarr; 読む・意味づけの時間&uarr;」</b>。集めるのを自動化しきれない部分（数字・一覧）は<b>手メモ／インポートで&ldquo;現実的に&rdquo;達成</b>します。</p>
+  </section>
+
+  <!-- 4 データモデル -->
+  <section>
+    <h2><span class="n">4</span>データモデル（システムD）</h2>
+    <div class="model">&#9632; 競合/自社マスタ（決済アプリ）
+   名前 ／ 公式ハンドル ／ きせかえ表記ゆれ（例 d払い=「きせかえ」, Vポイント=「キセカエ」, PayPay=「きせかえ」）
+
+&#9632; IPコラボ先マスタ
+   IP名 ／ 公式ハンドル ／ ジャンル（自由カテゴリ：スポーツ / エンタメ …）
+
+&#9632; 施策レコード（＝定量カタログの1行）
+   主体（競合/自社） × IP名 × キセカエ名 × リリース日 × 掲載終了日 × ジャンル
+   ＋ VOC有無/メモ ＋ 数字メモ｛RT・いいね・インプレッション・フォロワー・ツイートURL・日付｝
+
+&#9632; VOC収集メモ
+   本文/URL × 賛否タグ（好評/不満/会員登録した/要注目） × 紐づくIP・施策
+
+すべて localStorage に自動保存 ／ JSON書き出し・読み込みでバックアップ・共有
+Vポイント一覧は Easy Scraper 等で抽出 &rarr; CSV/貼り付けインポート（自動巡回はしない）</div>
+  </section>
+
+  <!-- 5 画面構成 -->
+  <section>
+    <h2><span class="n">5</span>画面構成（UI/UX C ｜ マスタと作業を分離）</h2>
+    <div class="screens">
+      <div class="row"><b>&#9312; ダッシュボード</b><span>主画面。<b>競合 × 施策リンク</b>。各競合の下にきせかえ施策、施策ごとに「公式/IP公式を見る」「この施策のVOCを見る」。最近の収集物も表示</span></div>
+      <div class="row"><b>&#9313; 定量カタログ</b><span>施策レコードの表。月で絞り込み・<b>CSV/貼り付けインポート</b>（Vポイント一覧）・書き出し。数字メモ列（RT/いいね/インプレ/URL）</span></div>
+      <div class="row"><b>&#9314; 検索ビルダー</b><span><b>施策モード</b>(<code>from:@公式</code>)／<b>生声モード</b>(アプリ名＋表記ゆれ きせかえ)。期間・min_faves・lang:ja は任意トグル。<b>生クエリは編集可能</b>、既定は Latest</span></div>
+      <div class="row"><b>&#9315; VOC収集メモ</b><span>拾った声を賛否タグ付きで一覧化 &rarr; 全部コピーで報告下地</span></div>
+      <div class="row"><b>&#9316; マスタ管理</b><span>競合・IP・カテゴリの<b>自由登録/編集</b>（CRUD）。公式ハンドル・表記ゆれ・ジャンルを保持</span></div>
+    </div>
+  </section>
+
+  <!-- 6 検索仕様 -->
+  <section>
+    <h2><span class="n">6</span>検索クエリ仕様（マーケB ＋ 演算子ガイド準拠）</h2>
+    <ul>
+      <li><b>施策を知る</b>：<code>from:@競合公式 OR from:@IP公式 (きせかえ OR コラボ) since: until:</code></li>
+      <li><b>生声を知る</b>：<code>"d払い" (きせかえ OR キセカエ) lang:ja min_faves:20 since: until: -filter:retweets</code></li>
+      <li>0件回避：既定は<b>広め</b>（制約は任意トグル）＋<b>Latest</b>表示。AND厳しめ&hArr;広めを切替</li>
+      <li>注意：<b>ORは大文字</b>／記号は半角／<b>Xはログイン必須</b></li>
+    </ul>
+  </section>
+
+  <!-- 7 セキュリティ -->
+  <section>
+    <h2><span class="n">7</span>セキュリティ・運用（E）</h2>
+    <ul>
+      <li><b>サーバー無し・DB無し</b>＝乗っ取られて流出する対象が無い。データは<b>ブラウザ内のみ</b>、外に送らない</li>
+      <li>置き場所：<b>非公開（ローカルHTMLをダブルクリックで開く）</b>。localhost起動も.exeも不要。通信はXを開く時だけ</li>
+      <li>機密度は軽め（公開X情報中心）。<b>JSON書き出しでバックアップ</b>。貼付テキストは<b>HTMLエスケープ</b>でXSS対策</li>
+      <li>外部サイトの自動巡回はしない（403・規約・保守リスク回避）。一覧は<b>外部ツールで抽出&rarr;インポート</b></li>
+    </ul>
+  </section>
+
+  <!-- 8 4つの問い -->
+  <section>
+    <h2><span class="n">8</span>ご指定の4つの問いへの回答</h2>
+    <div class="q"><div class="ttl"><span class="tag t-q">問1</span>目的は達成されるか？</div>
+      <span class="verdict y">達成できる（条件付き）。</span> 探す時間を最小化し、定量カタログ＋定性VOC＋数字メモを1か所に集約 &rarr; 月次で書き出して報告・打ち手判断に直結。<b>ただし&ldquo;完全自動の数字集計・スクレイピング&rdquo;は範囲外</b>。手メモ／インポートで現実的に達成する。</div>
+    <div class="q"><div class="ttl"><span class="tag t-v">問2</span>ユーザビリティは目的に沿うか？</div>
+      <span class="verdict y">沿う。</span> 起動不要・自動保存・クエリ自動生成・表記ゆれ自動・<b>マスタと作業の分離</b>・<b>カテゴリで後から探せる</b>。学習コスト低、毎月の反復に最適化。</div>
+    <div class="q"><div class="ttl"><span class="tag t-n">問3</span>何にフィットするツールか？</div>
+      「決済アプリ×きせかえIPコラボ」の<b>月次競合インテリジェンス</b>に特化。リアルタイム監視や厳密定量には不向き（割り切り済み）。</div>
+    <div class="q"><div class="ttl"><span class="tag t-q">問4</span>どんなペルソナ・課題を解決するか？</div>
+      d払い/dポイントのマーケ・企画担当の「探す手間・散らかり・取りこぼし・一覧化の重さ」を解決し、<b>意味づけと提案に時間を回せる</b>状態をつくる。</div>
+  </section>
+
+  <!-- 9 スコープ外 -->
+  <section>
+    <h2><span class="n">9</span>スコープ外（将来・要予算）</h2>
+    <ul>
+      <li>Xの数字の自動収集／推移グラフ（API・有料）</li>
+      <li>外部サイトの自動スクレイピング（脆弱・規約リスク。当面はEasy Scraper&rarr;インポート）</li>
+      <li>チームのリアルタイム共同編集（当面はJSON書き出し共有）</li>
+    </ul>
+  </section>
+</div>
+</body>
+</html>
