@@ -353,6 +353,8 @@ const uid = ()=> Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 // ---------- 保存（debounce） ----------
 let saveTimer=null;
+let serverMode=false;           // server.py が居れば true（data.json保存）。居なければ localStorage 保存
+const LS_KEY="kisekae-wb-data"; // 静的ホスティング/ファイル直開き用の保存先
 function markSaving(){ $("saveState").textContent="保存中…"; }
 function scheduleSave(){
   markSaving();
@@ -360,17 +362,33 @@ function scheduleSave(){
   saveTimer=setTimeout(doSave,400);
 }
 async function doSave(){
-  try{
-    await fetch("/api/data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});
-    $("saveState").textContent="保存済み ✓ (data.json)";
-  }catch(e){ $("saveState").textContent="保存失敗（サーバー未起動?）"; }
+  // どのモードでも localStorage に保存（バックアップ兼・静的モードの本保存）
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+  if(serverMode){
+    try{
+      await fetch("/api/data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});
+      $("saveState").textContent="保存済み ✓ (data.json)";
+    }catch(e){ $("saveState").textContent="保存失敗（サーバー未起動?）"; }
+  }else{
+    $("saveState").textContent="保存済み ✓ (このブラウザに保存)";
+  }
 }
 async function loadData(){
+  // まず server.py を試す。居れば data.json、居なければ localStorage から復元
   try{
-    const r=await fetch("/api/data"); const d=await r.json();
+    const r=await fetch("/api/data"); if(!r.ok) throw new Error("no server");
+    const d=await r.json();
     state=Object.assign({competitors:[],ips:[],categories:[],campaigns:[],vocs:[]},d);
+    serverMode=true;
     $("saveState").textContent="保存済み ✓ (data.json)";
-  }catch(e){ $("saveState").textContent="読み込み失敗"; }
+  }catch(e){
+    serverMode=false;
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if(raw) state=Object.assign({competitors:[],ips:[],categories:[],campaigns:[],vocs:[]},JSON.parse(raw));
+    }catch(e2){}
+    $("saveState").textContent="保存済み ✓ (このブラウザに保存)";
+  }
   renderAll();
 }
 

@@ -9,6 +9,19 @@
 
 ## 使い方（起動）
 
+### サーバ無しでも動きます（ファイル直開き／URL公開）
+`server.py` を立てなくても、`workbench/index.html` を**ブラウザで直接開く**だけで使えます。
+- サーバが居ない時は、データは**そのブラウザの localStorage** に保存されます（保存表示が「このブラウザに保存」になります）。
+- `server.py` を立てた時は、従来通り `data.json`（実ファイル）に保存します。
+- 端末・ブラウザをまたいでデータを移すときは、⑤マスタの「JSON書き出し／読み込み」を使ってください（localStorage はブラウザ単位のため）。
+
+### ブラウザでURLから開く（GitHub Pages）
+ダウンロードせずタップで開きたい場合は、GitHub Pages で公開できます（リポジトリ管理者の一度きりの設定）。
+1. GitHub → リポジトリ **Settings → Pages**
+2. **Build and deployment → Source: Deploy from a branch**
+3. **Branch** に公開したいブランチ、**フォルダ** は `/ (root)` を選び **Save**
+4. 1〜2分後 `https://<ユーザー名>.github.io/x-search-generator/workbench/` で開けます
+
 ### Mac / Linux
 `start.command` をダブルクリック。
 （初回だけ「実行できない」と出たら、ターミナルで `chmod +x start.command` を一度実行）
