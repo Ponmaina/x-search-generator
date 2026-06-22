@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ワイヤーフレーム｜きせかえ競合インテリジェンス・ワークベンチ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --line:#d0d0d0; --line2:#e3e3e3; --ink:#1a1a1a; --sub:#777;
+    --box:#ececec; --box2:#f4f4f4; --chip:#e0e0e0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#fff; color:var(--ink);
+    font-family:"Noto Sans JP",sans-serif; font-size:13px; line-height:1.7;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:20px 16px 80px;}
+
+  /* 注釈ラベル（このワイヤーの説明） */
+  .note{color:var(--sub); font-size:12px; margin:2px 0 0;}
+  .lead{color:var(--sub); font-size:12px; margin:4px 0 18px;}
+
+  /* ヘッダー＋タブ */
+  .topbar{border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .topbar h1{font-size:16px; font-weight:700; margin:0;}
+  .topbar .sub{color:var(--sub); font-size:12px; margin-top:2px;}
+  .tabs{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+  .tab{border:1px solid var(--line); border-radius:8px; padding:7px 12px; color:var(--ink); background:#fff; font-size:12.5px;}
+  .tab.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  /* 画面セクション */
+  .screen{margin-top:26px;}
+  .screen > h2{
+    font-size:14px; font-weight:700; margin:0 0 4px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .screen > h2 .num{
+    display:inline-grid; place-items:center; width:22px; height:22px;
+    border:1px solid var(--ink); border-radius:6px; font-size:12px;
+  }
+  .frame{border:1px solid var(--line); border-radius:10px; padding:16px; margin-top:8px;}
+
+  /* 共通パーツ（ワイヤー） */
+  .label{font-size:11.5px; color:var(--sub); margin-bottom:4px; display:block;}
+  .field{border:1px solid var(--line); border-radius:7px; background:var(--box2); padding:8px 10px; color:var(--sub); font-size:12px;}
+  .field i{margin-right:6px; color:#aaa;}
+  .row{display:flex; gap:10px; flex-wrap:wrap;}
+  .row > *{flex:1; min-width:140px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:1px solid var(--ink);
+    border-radius:7px; padding:7px 12px; font-size:12px; background:#fff; color:var(--ink);
+  }
+  .btn.solid{background:var(--ink); color:#fff;}
+  .btn.ghost{border-color:var(--line); color:var(--sub);}
+  .btns{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .chip{display:inline-flex; align-items:center; gap:5px; border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:11.5px; color:var(--sub); background:#fff;}
+  .toggle{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:7px; padding:6px 10px; font-size:12px; color:var(--sub);}
+  .toggle .sw{width:26px; height:14px; border:1px solid var(--sub); border-radius:999px; position:relative; display:inline-block;}
+  .toggle .sw::after{content:""; position:absolute; top:1px; left:1px; width:10px; height:10px; border-radius:50%; background:var(--sub);}
+  .toggle.on .sw{background:var(--ink); border-color:var(--ink);}
+  .toggle.on .sw::after{left:13px; background:#fff;}
+  .ph{background:var(--box); border:1px dashed var(--line); border-radius:7px; color:#999; font-size:11.5px; display:grid; place-items:center; min-height:54px; text-align:center; padding:8px;}
+  .sec-title{font-size:12.5px; font-weight:700; margin:0 0 8px; display:flex; align-items:center; gap:6px;}
+  .muted{color:var(--sub);}
+  .hr{height:1px; background:var(--line2); border:0; margin:14px 0;}
+
+  /* カード（ダッシュ・マスタ・VOC） */
+  .card{border:1px solid var(--line); border-radius:9px; padding:12px; background:#fff;}
+  .stack{display:flex; flex-direction:column; gap:10px;}
+  .grid2{display:grid; grid-template-columns:1.6fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+
+  /* テーブル（カタログ） */
+  table{width:100%; border-collapse:collapse; font-size:11.5px;}
+  th,td{border:1px solid var(--line2); padding:7px 8px; text-align:left; color:var(--sub); white-space:nowrap;}
+  th{background:var(--box2); color:var(--ink); font-weight:500;}
+
+  /* 施策行（ダッシュ） */
+  .camp{border:1px solid var(--line2); border-radius:7px; padding:9px 10px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  .camp .nm{font-size:12px;}
+  .minibtns{display:flex; gap:6px; flex-wrap:wrap;}
+  .mini{border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:11px; color:var(--sub); display:inline-flex; align-items:center; gap:5px;}
+
+  @media(max-width:700px){
+    .grid2,.grid3{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="note"><i class="fa-regular fa-pen-to-square"></i> ワイヤーフレーム（白・黒・グレーのみ／実装前のレイアウト確認用）</p>
+  <p class="lead">スペック「§5 画面構成」に沿って、5つの画面を上から順にならべています。中身はダミーの「型」です。</p>
+
+  <!-- ヘッダー＋タブ -->
+  <div class="topbar">
+    <h1>きせかえ競合インテリジェンス・ワークベンチ</h1>
+    <div class="sub">決済アプリ × きせかえIPコラボ施策を、毎月まとめるローカルツールです。</div>
+    <div class="tabs">
+      <span class="tab on"><i class="fa-solid fa-gauge-high"></i> ① ダッシュボード</span>
+      <span class="tab"><i class="fa-solid fa-table-list"></i> ② 定量カタログ</span>
+      <span class="tab"><i class="fa-solid fa-magnifying-glass"></i> ③ 検索ビルダー</span>
+      <span class="tab"><i class="fa-regular fa-comments"></i> ④ VOC収集メモ</span>
+      <span class="tab"><i class="fa-solid fa-sliders"></i> ⑤ マスタ管理</span>
+    </div>
+  </div>
+
+  <!-- ① ダッシュボード -->
+  <section class="screen">
+    <h2><span class="num">1</span> ダッシュボード</h2>
+    <p class="note">主画面です。競合ごとに、きせかえ施策と「見にいくリンク」をならべます。</p>
+    <div class="frame">
+      <div class="grid2">
+
+        <!-- 左：競合 × 施策リンク -->
+        <div class="stack">
+          <div class="sec-title"><i class="fa-solid fa-building"></i> 競合 × 施策リンク</div>
+
+          <div class="card stack">
+            <div class="muted" style="font-size:12.5px;"><i class="fa-solid fa-circle-user"></i> ［競合名］ <span class="chip">@公式ハンドル</span></div>
+            <div class="camp">
+              <span class="nm">［きせかえ名・リリース日］</span>
+              <span class="minibtns">
+                <span class="mini"><i class="fa-solid fa-arrow-up-right-from-square"></i> 公式を見る</span>
+                <span class="mini"><i class="fa-solid fa-arrow-up-right-from-square"></i> IP公式を見る</span>
+                <span class="mini"><i class="fa-regular fa-comment-dots"></i> この施策のVOC</span>
+              </span>
+            </div>
+            <div class="camp">
+              <span class="nm">［きせかえ名・リリース日］</span>
+              <span class="minibtns">
+                <span class="mini"><i class="fa-solid fa-arrow-up-right-from-square"></i> 公式を見る</span>
+                <span class="mini"><i class="fa-solid fa-arrow-up-right-from-square"></i> IP公式を見る</span>
+                <span class="mini"><i class="fa-regular fa-comment-dots"></i> この施策のVOC</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="card stack">
+            <div class="muted" style="font-size:12.5px;"><i class="fa-solid fa-circle-user"></i> ［競合名］ <span class="chip">@公式ハンドル</span></div>
+            <div class="camp">
+              <span class="nm">［きせかえ名・リリース日］</span>
+              <span class="minibtns">
+                <span class="mini"><i class="fa-solid fa-arrow-up-right-from-square"></i> 公式を見る</span>
+                <span class="mini"><i class="fa-solid fa-arrow-up-right-from-square"></i> IP公式を見る</span>
+                <span class="mini"><i class="fa-regular fa-comment-dots"></i> この施策のVOC</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：最近の収集物 -->
+        <div class="stack">
+          <div class="sec-title"><i class="fa-regular fa-clock"></i> 最近の収集物</div>
+          <div class="card stack">
+            <div class="ph">［最近ためた施策・VOCの一覧］</div>
+            <div class="ph">［リスト項目］</div>
+            <div class="ph">［リスト項目］</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 定量カタログ -->
+  <section class="screen">
+    <h2><span class="num">2</span> 定量カタログ</h2>
+    <p class="note">施策を1行ずつ表にためます。月でしぼり、書き出しや貼り付け取り込みもできます。</p>
+    <div class="frame">
+      <div class="btns" style="margin-top:0; justify-content:space-between;">
+        <div class="row" style="flex:1;">
+          <div style="max-width:170px;">
+            <span class="label">月でしぼる</span>
+            <div class="field"><i class="fa-regular fa-calendar"></i> 2026-06 ▾</div>
+          </div>
+        </div>
+        <div class="btns" style="margin-top:0;">
+          <span class="btn ghost"><i class="fa-solid fa-paste"></i> 貼り付け取り込み</span>
+          <span class="btn"><i class="fa-solid fa-file-csv"></i> CSV書き出し</span>
+        </div>
+      </div>
+
+      <hr class="hr">
+
+      <div style="overflow:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>主体</th><th>IP名</th><th>キセカエ名</th><th>リリース日</th><th>掲載終了</th><th>ジャンル</th>
+              <th>RT</th><th>いいね</th><th>インプレ</th><th>URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>［競合/自社］</td><td>［IP名］</td><td>［きせかえ名］</td><td>0000-00-00</td><td>0000-00-00</td><td>［ジャンル］</td><td>000</td><td>000</td><td>0,000</td><td><i class="fa-solid fa-link"></i></td></tr>
+            <tr><td>［競合/自社］</td><td>［IP名］</td><td>［きせかえ名］</td><td>0000-00-00</td><td>0000-00-00</td><td>［ジャンル］</td><td>000</td><td>000</td><td>0,000</td><td><i class="fa-solid fa-link"></i></td></tr>
+            <tr><td>［競合/自社］</td><td>［IP名］</td><td>［きせかえ名］</td><td>0000-00-00</td><td>0000-00-00</td><td>［ジャンル］</td><td>000</td><td>000</td><td>0,000</td><td><i class="fa-solid fa-link"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note" style="margin-top:10px;">数字メモは、手入力か外部ツールの貼り付けで入れます。自動の巡回はしません。</p>
+    </div>
+  </section>
+
+  <!-- ③ 検索ビルダー -->
+  <section class="screen">
+    <h2><span class="num">3</span> 検索ビルダー</h2>
+    <p class="note">表記ゆれを足して、Xの検索クエリを自動でつくります。クエリは手で直せます。</p>
+    <div class="frame">
+      <div class="btns" style="margin-top:0;">
+        <span class="chip" style="border-color:#1a1a1a; color:#1a1a1a;"><i class="fa-solid fa-bullhorn"></i> 施策モード（from:@公式）</span>
+        <span class="chip"><i class="fa-regular fa-comments"></i> 生声モード（アプリ名＋きせかえ）</span>
+      </div>
+
+      <hr class="hr">
+
+      <div class="row">
+        <div>
+          <span class="label">主体（アプリ）</span>
+          <div class="field"><i class="fa-solid fa-mobile-screen"></i> ［競合・自社を選ぶ］ ▾</div>
+        </div>
+        <div>
+          <span class="label">IPコラボ先</span>
+          <div class="field"><i class="fa-solid fa-handshake"></i> ［IPを選ぶ・任意］ ▾</div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <span class="toggle on"><span class="sw"></span> 期間でしぼる</span>
+        <span class="toggle"><span class="sw"></span> min_faves（いいね下限）</span>
+        <span class="toggle on"><span class="sw"></span> lang:ja（日本語のみ）</span>
+        <span class="toggle on"><span class="sw"></span> Latest（最新）</span>
+      </div>
+
+      <div style="margin-top:12px;">
+        <span class="label">生成されたクエリ（編集できます）</span>
+        <div class="field" style="min-height:60px; align-items:flex-start;">"［アプリ名］" (きせかえ OR キセカエ) lang:ja since:0000-00-00 until:0000-00-00 -filter:retweets</div>
+      </div>
+
+      <div class="btns">
+        <span class="btn solid"><i class="fa-brands fa-x-twitter"></i> Xで検索を開く</span>
+        <span class="btn"><i class="fa-regular fa-copy"></i> クエリをコピー</span>
+      </div>
+      <p class="note" style="margin-top:10px;">「OR」は大文字、記号は半角にします。Xはログインが必要です。</p>
+    </div>
+  </section>
+
+  <!-- ④ VOC収集メモ -->
+  <section class="screen">
+    <h2><span class="num">4</span> VOC収集メモ</h2>
+    <p class="note">拾った生の声を、賛否タグつきでためます。あとで「全部コピー」して報告の下地にします。</p>
+    <div class="frame">
+      <div class="grid2">
+
+        <!-- 左：入力 -->
+        <div class="stack">
+          <div class="sec-title"><i class="fa-solid fa-plus"></i> 声を1件ためる</div>
+          <div>
+            <span class="label">声の本文（コピペ）</span>
+            <div class="field" style="min-height:80px; align-items:flex-start;">［ユーザーの声を貼り付け］</div>
+          </div>
+          <div class="row">
+            <div>
+              <span class="label">URL（任意）</span>
+              <div class="field"><i class="fa-solid fa-link"></i> https://x.com/...</div>
+            </div>
+            <div style="max-width:160px;">
+              <span class="label">賛否タグ</span>
+              <div class="field">好評 ▾</div>
+            </div>
+          </div>
+          <div class="btns">
+            <span class="btn solid"><i class="fa-solid fa-floppy-disk"></i> ためる</span>
+          </div>
+        </div>
+
+        <!-- 右：一覧 -->
+        <div class="stack">
+          <div class="sec-title"><i class="fa-solid fa-list"></i> ためた声の一覧</div>
+          <div class="card">
+            <span class="chip"><i class="fa-regular fa-thumbs-up"></i> 好評</span>
+            <p class="muted" style="margin:6px 0 0;">［声の本文・要約］</p>
+          </div>
+          <div class="card">
+            <span class="chip"><i class="fa-regular fa-thumbs-down"></i> 不満</span>
+            <p class="muted" style="margin:6px 0 0;">［声の本文・要約］</p>
+          </div>
+          <div class="btns">
+            <span class="btn"><i class="fa-regular fa-copy"></i> 全部コピー（報告の下地）</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ マスタ管理 -->
+  <section class="screen">
+    <h2><span class="num">5</span> マスタ管理</h2>
+    <p class="note">競合・IP・カテゴリを、自由に登録して直せます。作業の画面とは分けています。</p>
+    <div class="frame">
+      <div class="grid3">
+
+        <div class="card stack">
+          <div class="sec-title"><i class="fa-solid fa-building"></i> 競合・自社</div>
+          <div class="field">［名前］</div>
+          <div class="field">［公式ハンドル］</div>
+          <div class="field">［きせかえ表記ゆれ］</div>
+          <span class="btn ghost" style="align-self:flex-start;"><i class="fa-solid fa-plus"></i> 追加</span>
+          <hr class="hr" style="margin:6px 0;">
+          <div class="ph">［登録ずみの一覧］</div>
+        </div>
+
+        <div class="card stack">
+          <div class="sec-title"><i class="fa-solid fa-handshake"></i> IPコラボ先</div>
+          <div class="field">［IP名］</div>
+          <div class="field">［公式ハンドル］</div>
+          <div class="field">［ジャンル（複数可）］</div>
+          <span class="btn ghost" style="align-self:flex-start;"><i class="fa-solid fa-plus"></i> 追加</span>
+          <hr class="hr" style="margin:6px 0;">
+          <div class="ph">［登録ずみの一覧］</div>
+        </div>
+
+        <div class="card stack">
+          <div class="sec-title"><i class="fa-solid fa-tags"></i> カテゴリ</div>
+          <div class="field">［新しいカテゴリ］</div>
+          <span class="btn ghost" style="align-self:flex-start;"><i class="fa-solid fa-plus"></i> 追加</span>
+          <hr class="hr" style="margin:6px 0;">
+          <div class="ph">［カテゴリのタグ一覧］</div>
+        </div>
+
+      </div>
+
+      <hr class="hr">
+      <div class="btns" style="margin-top:0;">
+        <span class="btn"><i class="fa-solid fa-download"></i> JSON書き出し</span>
+        <span class="btn ghost"><i class="fa-solid fa-upload"></i> JSON読み込み</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
