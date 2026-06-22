@@ -220,13 +220,14 @@
 
     <div class="card">
       <h3>Xから取り込み（ブックマークレット）</h3>
-      <p class="small">下のボタンを<b>ブックマークバーにドラッグ</b>して登録 → Xで読みたい<b>投稿のページ</b>を開き、ログインした状態でこのブックマークを押すと、<b>その投稿の本文とURLがこのツールに取り込まれ</b>、VOCタブに自動で入ります（賛否タグを選んで「＋ VOCを追加」で保存）。</p>
-      <p style="margin:10px 0"><a id="bmLink" class="btn x" href="#" onclick="return false;" draggable="true">📥 Xの投稿を取り込み</a></p>
+      <p class="small">下のボタンを<b>ブックマークバーにドラッグ</b>して登録 → Xで読みたい<b>投稿や記事のページ</b>を開き、ログインした状態でこのブックマークを押すと、<b>本文（記事は全文）とURLがこのツールに取り込まれ</b>、VOCタブに自動で入ります（賛否タグを選んで「＋ VOCを追加」で保存）。</p>
+      <p style="margin:10px 0"><a id="bmLink" class="btn x" href="#" onclick="return false;" draggable="true">📥 Xの投稿・記事を取り込み</a></p>
       <div class="hint">
         ・パスワードは一切使いません（あなたのログイン済み画面をそのまま読みます）。<br>
-        ・<b>個別の投稿ページ</b>で押してください（タイムライン上では本文を特定できないことがあります）。<br>
-        ・Xの画面構造が変わると取得できなくなる場合があります。そのときは本文を手動で貼り付けてください。<br>
-        ・ブックマークバーが出ていない場合：Chrome なら <code>Ctrl/⌘+Shift+B</code> で表示できます。
+        ・通常の投稿・スレッド・<b>記事（長文）</b>に対応。取り込みたい所を<b>選択（ドラッグで反転）してから押す</b>と、その部分だけを確実に取り込めます。<br>
+        ・押すと<b>新しいタブが開きます</b>。ブラウザに<b>ポップアップの許可</b>を求められたら許可してください。<br>
+        ・<b>個別の投稿／記事ページ</b>で押してください（タイムライン上では本文を特定できないことがあります）。<br>
+        ・うまく取れない時は本文を手動で貼り付けてください。ブックマークバーが無ければ Chrome は <code>Ctrl/⌘+Shift+B</code> で表示できます。
       </div>
     </div>
 
@@ -657,26 +658,55 @@ $("dImport").addEventListener("change",e=>{
   reader.readAsText(f); e.target.value="";
 });
 
-// ---------- Xブックマークレット ----------
-function setupBookmarklet(){
-  var origin=location.origin;
-  // Xの投稿ページで実行 → 本文とURLを取り込みURLへ遷移
-  var code="(function(){var t=document.querySelector('[data-testid=\"tweetText\"]');var x=t?t.innerText:(document.title||'');x=x.slice(0,8000);var u=location.href;window.open('"+origin+"/?ingest='+encodeURIComponent(x)+'&url='+encodeURIComponent(u),'_blank');})();";
-  var el=$("bmLink"); if(el) el.href="javascript:"+code;
+// ---------- Xブックマークレット（記事=長文対応 / postMessage方式） ----------
+// X側で実行される本体。通常の関数として書き、toString()でブックマークレット化する
+function xIngestBookmarklet(ORIGIN){
+  function grab(){
+    var sel=(window.getSelection&&String(window.getSelection())||"").trim();
+    if(sel) return sel;                                  // 選択テキスト最優先
+    var c=['[data-testid="twitterArticleRichTextView"]','[data-testid="longformRichTextView"]','article'];
+    for(var i=0;i<c.length;i++){var n=document.querySelector(c[i]); if(n){var t=(n.innerText||"").trim(); if(t.length>40) return t;}}
+    var tt=document.querySelectorAll('[data-testid="tweetText"]');
+    if(tt.length){var a=[]; for(var j=0;j<tt.length;j++) a.push(tt[j].innerText); return a.join("\n\n");}
+    return document.title||"";
+  }
+  var h1=document.querySelector("h1");
+  var payload={type:"xingest", text:grab(), title:h1?(h1.innerText||"").trim():"", url:location.href};
+  function handler(e){
+    if(e.origin!==ORIGIN) return;
+    if(e.data&&e.data.type==="xingest-ready"){ e.source.postMessage(payload, ORIGIN); window.removeEventListener("message", handler); }
+  }
+  window.addEventListener("message", handler);
+  if(!window.open(ORIGIN+"/?ingest=1","_blank")) alert("ポップアップがブロックされました。許可してから再度お試しください。");
 }
-function handleIngest(){
+function setupBookmarklet(){
+  var code="("+xIngestBookmarklet.toString()+")("+JSON.stringify(location.origin)+")";
+  var el=$("bmLink"); if(el) el.href="javascript:"+code;   // javascript:URLは生コードのまま（encodeしない）
+}
+// ローカルツール側：X記事/投稿の本文を受信
+function setupIngestListener(){
+  window.addEventListener("message", function(e){
+    if(e.origin!=="https://x.com" && e.origin!=="https://twitter.com" && e.origin!=="https://mobile.twitter.com") return;
+    var d=e.data; if(!d || d.type!=="xingest") return;
+    var text=d.text||""; if(d.title && text.indexOf(d.title)<0) text=d.title+"\n\n"+text;
+    var btn=document.querySelector('.tabs button[data-tab="voc"]'); if(btn) btn.click();
+    $("vText").value=text; $("vUrl").value=d.url||"";
+    try{ $("vText").focus(); }catch(err){}
+  });
+}
+// 取り込み用に開かれたタブ：openerに「準備OK」を通知してデータを受け取る
+function announceReady(){
   var p=new URLSearchParams(location.search);
   if(!p.has("ingest")) return;
-  var text=p.get("ingest")||"", url=p.get("url")||"";
   var btn=document.querySelector('.tabs button[data-tab="voc"]'); if(btn) btn.click();
-  $("vText").value=text; $("vUrl").value=url;
   history.replaceState(null,"",location.pathname);  // クエリ除去（二重取り込み防止）
-  try{ $("vText").focus(); }catch(e){}
+  if(window.opener){ try{ window.opener.postMessage({type:"xingest-ready"}, "*"); }catch(err){} }
 }
 
 // ---------- 起動 ----------
 setupBookmarklet();
-handleIngest();
+setupIngestListener();
+announceReady();
 loadData();
 </script>
 </body>
