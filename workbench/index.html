@@ -69,6 +69,7 @@
   <button data-tab="search">③ 検索</button>
   <button data-tab="voc">④ VOC</button>
   <button data-tab="master">⑤ マスタ</button>
+  <button data-tab="wf">⑥ WF生成</button>
 </div>
 
 <div class="wrap">
@@ -289,6 +290,43 @@
         <button class="btn sec sm" id="dExport">JSON書き出し</button>
         <label class="btn gray sm" style="cursor:pointer">JSON読み込み<input type="file" id="dImport" accept="application/json" style="display:none"></label>
       </div>
+    </div>
+  </section>
+
+  <!-- ⑥ WF生成（ワイヤーフレーム生成プロンプト） -->
+  <section id="view-wf" class="view">
+    <div class="card">
+      <h2>ワイヤーフレーム生成プロンプト</h2>
+      <p class="muted">Claudeにそのまま貼れる「ワイヤーフレーム生成プロンプト」を作ります。ルールを覚えさせれば、次回からは「ワイヤーをつくって」だけでOK。</p>
+      <p class="small">出典：@hiroho150cm「ワイヤーフレームプロンプト【コピペ用】｜Claudeに『ルール』をおぼえさせる指示つき」。ルール文は記事のものをそのまま使用しています。</p>
+
+      <div class="row" style="margin-top:6px;align-items:center;">
+        <label class="toggle"><input type="radio" name="wfMode" id="wfModeSkill" checked> スキル登録用（初回の1回・推奨）</label>
+        <label class="toggle"><input type="radio" name="wfMode" id="wfModeSingle"> このまま単発で作る</label>
+      </div>
+
+      <div id="wfSingleOpts" style="display:none;">
+        <label style="margin-top:8px;display:block;">作るもの／掲載情報（任意・貼り付け）</label>
+        <textarea id="wfDesc" placeholder="例：◯◯アプリの紹介LP。/ または掲載したい原稿・情報をそのまま貼り付け"></textarea>
+        <div class="row" style="margin-top:8px;align-items:center;">
+          <label class="toggle"><input type="checkbox" id="wfKeepText" checked> テキストは変えないで</label>
+          <label class="toggle"><input type="checkbox" id="wfBreaks" checked> 違和感のない改行にして</label>
+        </div>
+      </div>
+
+      <h3>生成されたプロンプト（編集可）</h3>
+      <textarea id="wfPrompt" class="qbox" style="min-height:260px;color:#d9e6f0;background:#0f1419;border:0;"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="wfGen">生成</button>
+        <button class="btn gray" id="wfCopy">プロンプトをコピー</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>使い方</h3>
+      <p class="small"><b>スキル登録（初回）：</b>上のプロンプトをコピーしてClaudeのチャットに貼ると、スキル用のファイル（ZIP）が用意されます。チャットに出る「保存」ボタンを押せば登録完了。次からは「ワイヤーをつくって」だけでOKです。<br>※スキル機能は Pro・Max などの有料プランで使えます。</p>
+      <p class="small"><b>単発で作る：</b>「このまま単発で作る」を選び、掲載情報を貼り付けてコピー → Claudeに渡すと、その場でHTMLのワイヤーフレームが出ます。</p>
+      <p class="small"><b>複数ページのサイト：</b>チャットのプレビューはHTMLの切替が苦手なので、デスクトップにフォルダを用意して <b>Claude Code</b> でまとめて管理すると、複数HTMLをきれいに編集できます。</p>
     </div>
   </section>
 </div>
@@ -703,10 +741,70 @@ function announceReady(){
   if(window.opener){ try{ window.opener.postMessage({type:"xingest-ready"}, "*"); }catch(err){} }
 }
 
+// ---------- WF生成（ワイヤーフレーム生成プロンプト） ----------
+// ルール本文は @hiroho150cm の記事のまま（改変しない）
+var WF_RULES =
+"HTMLで、ワイヤーフレームを作成して。\n"+
+"以下のルールを、すべて守ってください。\n"+
+"\n"+
+"【レイアウト】\n"+
+"・読む負担を感じさせない、みてわかるレイアウトにして。\n"+
+"・洗練された、都会的でミニマルなレイアウトにして。\n"+
+"・余白とバランスは、ページ全体をうまく活用して。\n"+
+"・フォントは Noto Sans JP、やや小さめにして。\n"+
+"\n"+
+"【デザイン】\n"+
+"・色は「白・黒・グレー」だけにして。\n"+
+"・背景は基本白にして。全面が黒のページは作らないで。\n"+
+"・無駄な英語、線、シャドウなどの装飾は一切しないで。\n"+
+"・図や画像が必要な部分は、グレーボックスにして。\n"+
+"・アイコンは「Font Awesome」の無料版を使って。\n"+
+"\n"+
+"【ライティング】\n"+
+"・1文を、やや短くして。読点を1文に最低1度は使って。\n"+
+"・1〜2文ごとに、段落を分けて。\n"+
+"・漢字は違和感がない程度に、ひらがなにして。（例：行う=おこなう）\n"+
+"・強調したい名称やセリフには、記号「」を活用して。\n"+
+"・誤字や脱字は直して、ですます口調に統一して。";
+
+function buildWfPrompt(){
+  var single = $("wfModeSingle") && $("wfModeSingle").checked;
+  var out;
+  if(!single){
+    out = "以下は、ワイヤーフレーム用プロンプトです。これをスキルにしてください。\n\n" + WF_RULES;
+  }else{
+    var extra = "";
+    if($("wfKeepText") && $("wfKeepText").checked) extra += "\n・テキストは変えないで。";
+    if($("wfBreaks") && $("wfBreaks").checked) extra += "\n・違和感のない改行にして。";
+    out = WF_RULES + extra;
+    var desc = ($("wfDesc") && $("wfDesc").value || "").trim();
+    if(desc) out += "\n\n【作るもの／掲載情報】\n" + desc;
+  }
+  if($("wfPrompt")) $("wfPrompt").value = out;
+}
+
+function setupWf(){
+  if(!$("wfPrompt")) return;
+  var opts = $("wfSingleOpts");
+  function syncMode(){ if(opts) opts.style.display = ($("wfModeSingle").checked ? "block" : "none"); buildWfPrompt(); }
+  ["wfModeSkill","wfModeSingle"].forEach(function(id){ if($(id)) $(id).addEventListener("change", syncMode); });
+  ["wfDesc","wfKeepText","wfBreaks"].forEach(function(id){
+    var el=$(id); if(!el) return;
+    el.addEventListener("input", buildWfPrompt); el.addEventListener("change", buildWfPrompt);
+  });
+  $("wfGen").onclick = buildWfPrompt;
+  $("wfCopy").onclick = function(){
+    navigator.clipboard.writeText($("wfPrompt").value);
+    $("wfCopy").textContent="コピー済 ✓"; setTimeout(function(){ $("wfCopy").textContent="プロンプトをコピー"; },1200);
+  };
+  syncMode();
+}
+
 // ---------- 起動 ----------
 setupBookmarklet();
 setupIngestListener();
 announceReady();
+setupWf();
 loadData();
 </script>
 </body>
